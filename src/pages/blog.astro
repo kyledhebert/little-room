@@ -1,23 +1,45 @@
 ---
-import { getCollection } from "astro:content";
+import { render } from "astro:content";
 
 import BaseLayout from "../layouts/BaseLayout.astro";
 import BlogPost from "../components/BlogPost.astro";
+import { splitRecentBlogPosts } from "../lib/blog";
 
-const allPosts = await getCollection("blog")
 const pageTitle = "The Little Room";
+const { recent: recentPosts, older: olderPosts } = await splitRecentBlogPosts(10);
+
+const recentPostsWithContent = await Promise.all(
+  recentPosts.map(async (post: any) => {
+    const { Content } = await render(post);
+    return { post, Content };
+  })
+);
 ---
 
 <BaseLayout pageTitle={pageTitle}>
-  <p>
-    When you're in your little room, and you're working on something good.
+  <section>
+    <h2>Recent Posts</h2>
+    {recentPostsWithContent.map(({ post, Content }: any) => (
+      <article>
+        <h3><a href={`/posts/${post.id}/`}>{post.data.title}</a></h3>
+        <p>{post.data.description}</p>
+        <Content />
+      </article>
+    ))}
+  </section>
 
-    <ul>
-      {
-        allPosts.map((post: any) => (
-         <BlogPost url={`/posts/${post.id}/`} title={post.data.title} />
-        ))
-      }
-    </ul>
-  </p>
+  {olderPosts.length > 0 && (
+    <section>
+      <h2>More Posts</h2>
+      <ul>
+        {olderPosts.map((post: any) => (
+          <BlogPost
+            url={`/posts/${post.id}/`}
+            title={post.data.title}
+            description={post.data.description}
+          />
+        ))}
+      </ul>
+    </section>
+  )}
 </BaseLayout>

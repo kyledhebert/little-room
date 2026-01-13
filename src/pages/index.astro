@@ -1,8 +1,56 @@
 ---
+import { render } from "astro:content";
+
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { getLatestBlogPost } from "../lib/blog";
 const pageTitle = "Kyle Hebert";
+const latestPost = await getLatestBlogPost();
+const LatestContent = latestPost ? (await render(latestPost)).Content : null;
 ---
 
 <BaseLayout pageTitle={pageTitle}>
-	<h2>My awesome blog subtitle</h2>
+  <h2>I'm Kyle Hebert</h2>
+  <p>
+    I’m an engineering leader who spends a lot of time connecting dots. I work
+    across multiple teams, focusing on technical health, system-level risk, and
+    making sure product ambition lines up with what engineering can actually
+    sustain. I’ve learned the hard way that authority isn’t the point—initiative
+    is. I care about making good software, and even more about the people who
+    make it.
+  </p>
+  <p>
+    In my spare time I dabble in a lot of hobbies like video and board games,
+    reading (mostly fiction), and attending as many live music shows as I can
+    sustain.
+  </p>
+  <p>
+    I live in Minneapolis, but I was born and raised in Louisiana. It's
+    pronounced a-bear.
+  </p>
+  <p>Here's the latest thing I wrote:</p>
+  {
+    latestPost ? (
+      <div class="latest-post">
+        <h3>
+          <a href={`/posts/${latestPost.id}/`}>{latestPost.data.title}</a>
+        </h3>
+        <p>{latestPost.data.description}</p>
+        {LatestContent && <LatestContent />}
+      </div>
+    ) : (
+      <p>No posts yet.</p>
+    )
+  }
+  <style>
+    .latest-post {
+      font-size: 1.25rem;
+      margin-left: 2.5rem;
+      margin-right: 2.5rem;
+      line-height: 1.625rem;
+    }
+
+    .latest-post a {
+      text-decoration: none;
+    }
+  </style>
 </BaseLayout>
