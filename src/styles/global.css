@@ -1,14 +1,44 @@
+:root {
+  /* palette */
+  --blackberry-cream: #48284a;
+  --blushed-brick: #bf4342;
+  --lemon-chiffon: #f4f1bb;
+  --pale-slate: #aba8b2;
+  --aquamarine: #aeffd8;
+
+  /* usage */
+  --page-bg: var(--lemon-chiffon);
+  --page-fg: var(--blackberry-cream);
+  --surface-bg: #fff8e6;
+  --surface-fg: var(--blackberry-cream);
+  --border-color: #d8d2c8;
+  --link-color: var(--blushed-brick);
+  --link-hover-color: #9f2f2e;
+  --focus-ring: var(--aquamarine);
+
+  --nav-bg: var(--blackberry-cream);
+  --nav-fg: var(--lemon-chiffon);
+  --nav-link-fg: var(--blackberry-cream);
+  --nav-link-hover-bg: var(--aquamarine);
+}
+
 html {
-  background-color: #f1f5f9;
+  background-color: var(--page-bg);
+  color: var(--page-fg);
 }
 
 body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   margin: 0 auto;
   width: 100%;
   max-width: 80ch;
   padding: 1rem;
-  line-height: 1.5;
+  line-height: 1.75;
   font-family: var(--font-serif), serif;
+  font-weight: 500;
+  font-size: 1.5rem;
 }
 
 * {
@@ -24,12 +54,32 @@ h1 {
   font-size: 3.5rem;
 }
 
+a {
+  color: var(--link-color);
+}
+
+header nav {
+  display: flex;
+  align-items: center;
+}
+
+main {
+  flex: 1;
+}
+
+footer {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  margin: 0 auto;
+}
+
 /* nav styles */
 
 .menu {
-  background-color: #0d0950;
+  background-color: var(--nav-bg);
   border: none;
-  color: #fff;
+  color: var(--nav-fg);
   font-size: 1.2rem;
   font-weight: bold;
   padding: 5px 10px;
@@ -38,7 +88,7 @@ h1 {
 .nav-links {
   width: 100%;
   display: none;
-  margin: 0;
+  margin: 0 auto;
 }
 
 .nav-links a {
@@ -49,12 +99,12 @@ h1 {
   font-family: var(--font-sans), sans-serif;
   font-size: 1.2rem;
   text-transform: uppercase;
-  color: #0d0950;
+  color: var(--nav-link-fg);
 }
 
 .nav-links a:hover,
 .nav-links a:focus {
-  background-color: #ff9776;
+  background-color: var(--nav-link-hover-bg);
 }
 
 :has(.menu[aria-expanded="true"]) .nav-links {
@@ -63,7 +113,6 @@ h1 {
 
 @media screen and (min-width: 636px) {
   .nav-links {
-    margin-left: 5em;
     display: block;
     position: static;
     width: auto;
