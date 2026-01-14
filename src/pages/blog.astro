@@ -6,7 +6,7 @@ import BlogPost from "../components/BlogPost.astro";
 import { splitRecentBlogPosts } from "../lib/blog";
 
 const pageTitle = "The Little Room";
-const { recent: recentPosts, older: olderPosts } = await splitRecentBlogPosts(10);
+const { recent: recentPosts, older: olderPosts } = await splitRecentBlogPosts(1);
 
 const recentPostsWithContent = await Promise.all(
   recentPosts.map(async (post: any) => {
@@ -17,8 +17,6 @@ const recentPostsWithContent = await Promise.all(
 ---
 
 <BaseLayout pageTitle={pageTitle}>
-  <section>
-    <h2>Recent Posts</h2>
     {recentPostsWithContent.map(({ post, Content }: any) => (
       <article>
         <h3><a href={`/posts/${post.id}/`}>{post.data.title}</a></h3>
@@ -26,10 +24,10 @@ const recentPostsWithContent = await Promise.all(
         <Content />
       </article>
     ))}
-  </section>
+
 
   {olderPosts.length > 0 && (
-    <section>
+
       <h2>More Posts</h2>
       <ul>
         {olderPosts.map((post: any) => (
@@ -37,9 +35,15 @@ const recentPostsWithContent = await Promise.all(
             url={`/posts/${post.id}/`}
             title={post.data.title}
             description={post.data.description}
+            pubDate={post.data.pubDate}
           />
         ))}
       </ul>
-    </section>
   )}
+  <style>
+    a {
+      text-decoration: none;
+    }
+  </style>
+
 </BaseLayout>
