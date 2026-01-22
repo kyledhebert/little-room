@@ -15,8 +15,7 @@ const blog = defineCollection({
       image: z.object({
         url: z.string(),
         alt: z.string()
-      }),
-      tags: z.array(z.string())
+      }).optional(),
     })
 });
 // Export a single `collections` object to register your collection(s)
