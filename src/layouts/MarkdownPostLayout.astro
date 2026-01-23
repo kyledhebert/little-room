@@ -4,15 +4,25 @@ const { frontmatter } = Astro.props;
 ---
 
 <BaseLayout pageTitle={frontmatter.title}>
-  <p>{frontmatter.pubDate.toLocaleDateString()}</p>
-  <p><em>{frontmatter.description}</em></p>
-  <p>Written by: {frontmatter.author}</p>
-  <img src={frontmatter.image?.url} width="300" alt={frontmatter.image?.alt} />
+  {
+    frontmatter.image?.url && (
+      <img
+        src={frontmatter.image.url}
+        width="300"
+        alt={frontmatter.image?.alt}
+      />
+    )
+  }
   <slot />
+    <p class="pub-date">
+    Published on {
+      frontmatter.pubDate.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+    }
+  </p>
 </BaseLayout>
 
-<style>
-  a {
-    color: #00539f;
-  }
-</style>
+<style></style>

@@ -11,12 +11,12 @@ const LatestContent = latestPost ? (await render(latestPost)).Content : null;
 <BaseLayout pageTitle={pageTitle}>
   <h2>Hello and Welcome!</h2>
   <p>
-    I'm Kyle Hebert, an engineering leader who spends a lot of time connecting dots. I work
-    across multiple teams, focusing on technical health, system-level risk, and
-    making sure product ambition lines up with what engineering can actually
-    sustain. I’ve learned the hard way that authority isn’t the point—initiative
-    is. I care about making good software, and even more about the people who
-    make it.
+    I'm Kyle Hebert, an engineering leader who spends a lot of time connecting
+    dots. I work across multiple teams, focusing on technical health,
+    system-level risk, and making sure product ambition lines up with what
+    engineering can actually sustain. I’ve learned the hard way that authority
+    isn’t the point—initiative is. I care about making good software, and even
+    more about the people who make it.
   </p>
   <p>
     In my spare time I dabble in a lot of hobbies like video and board games,
@@ -34,8 +34,16 @@ const LatestContent = latestPost ? (await render(latestPost)).Content : null;
         <h3>
           <a href={`/posts/${latestPost.id}/`}>{latestPost.data.title}</a>
         </h3>
-        <p>{latestPost.data.description}</p>
-        {LatestContent && <LatestContent />}
+        {LatestContent && (
+          <div class="latest-post-content">
+            <LatestContent />
+          </div>
+        )}
+        <p>
+          <a class="read-more" href={`/posts/${latestPost.id}/`}>
+            Continue reading →
+          </a>
+        </p>
       </div>
     ) : (
       <p>No posts yet.</p>
@@ -49,8 +57,53 @@ const LatestContent = latestPost ? (await render(latestPost)).Content : null;
       line-height: 1.625rem;
     }
 
-    .latest-post a {
+    .latest-post h3 a {
       text-decoration: none;
+    }
+
+    .latest-post-content :global(h1) {
+      font-size: 1.5rem;
+      line-height: 1.875rem;
+      margin-top: 1.5rem;
+    }
+
+    .latest-post-content :global(h2) {
+      font-size: 1.25rem;
+      line-height: 1.625rem;
+      margin-top: 1.25rem;
+    }
+
+    .latest-post-content :global(h3) {
+      font-size: 1.125rem;
+      line-height: 1.5rem;
+      margin-top: 1.125rem;
+    }
+
+    .latest-post-content :global(h4) {
+      font-size: 1rem;
+      line-height: 1.375rem;
+      margin-top: 1rem;
+    }
+
+    .latest-post-content :global(h5) {
+      font-size: 0.95rem;
+      line-height: 1.25rem;
+      margin-top: 0.875rem;
+    }
+
+    .latest-post-content :global(h6) {
+      font-size: 0.9rem;
+      line-height: 1.125rem;
+      margin-top: 0.75rem;
+    }
+
+    .latest-post-content :global(p:nth-of-type(3) ~ *) {
+      display: none;
+    }
+
+    .read-more {
+      text-decoration: underline;
+      font-weight: 600;
     }
   </style>
 </BaseLayout>
