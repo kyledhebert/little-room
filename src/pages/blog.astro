@@ -5,11 +5,11 @@ import { splitRecentBlogPosts } from "../lib/blog";
 import { shiftHeadingLevels } from "../lib/markdown";
 
 const pageTitle = "The Little Room";
-const { recent: recentPosts, older: olderPosts } = await splitRecentBlogPosts(1);
+const { recent: recentPosts, older: olderPosts } = await splitRecentBlogPosts(5);
 
 const recentPostsWithHtml = recentPosts.map((post: any) => ({
   post,
-  html: post.rendered?.html ? shiftHeadingLevels(post.rendered.html, 10) : "",
+  html: post.rendered?.html ? shiftHeadingLevels(post.rendered.html, 1) : "",
 }));
 ---
 
@@ -25,8 +25,9 @@ const recentPostsWithHtml = recentPosts.map((post: any) => ({
       </em>
       <p>- "Little Room" by the White Stripes</p>
       </blockquote>
-    <p>This is a place where I'll post writing of my own. Mostly essays and short notes and my weekly retros.
-      It's named after <a href="https://genius.com/The-white-stripes-little-room-lyrics">the White Stripes song</a> of the same name. I heard it year's ago, and I've used the name for various incarnations of my blog over the years. 
+    <p>This is a place where I'll post writing of my own. Mostly essays,short notes and my weekly retros.
+      It's named after <a href="https://genius.com/The-white-stripes-little-room-lyrics">the White Stripes song</a> of the same name. I heard it years ago, and I've used the name for various incarnations of my blog ever since.
+      To me it perfectly captures the essence of what I'm doing here: good work, in my little room, that'll maybe turn into something bigger. 
     </p>
     <article>
       <h2>
