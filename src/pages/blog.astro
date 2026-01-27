@@ -9,7 +9,7 @@ const { recent: recentPosts, older: olderPosts } = await splitRecentBlogPosts(1)
 
 const recentPostsWithHtml = recentPosts.map((post: any) => ({
   post,
-  html: post.rendered?.html ? shiftHeadingLevels(post.rendered.html, 1) : "",
+  html: post.rendered?.html ? shiftHeadingLevels(post.rendered.html, 10) : "",
 }));
 ---
 
