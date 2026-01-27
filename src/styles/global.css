@@ -45,13 +45,23 @@ body {
   box-sizing: border-box;
 }
 
-h1, h2 {
+h1, h2, h3 {
   font-family: var(--font-display), sans-serif;
 }
 
 h1 {
   margin: 1rem 0;
   font-size: 3.5rem;
+}
+
+h2, h3, h4 {
+  margin-bottom: 0.35rem;
+}
+
+h2 + p,
+h3 + p,
+h4 + p {
+  margin-top: 0.35rem;
 }
 
 a {

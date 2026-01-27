@@ -1,14 +1,15 @@
 ---
-import { render } from "astro:content";
-
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getLatestBlogPost, getRelativeDate } from "../lib/blog";
+import { shiftHeadingLevels } from "../lib/markdown";
 const pageTitle = "Kyle Hebert";
 const latestPost = await getLatestBlogPost();
-const LatestContent = latestPost ? (await render(latestPost)).Content : null;
+const latestPostHtml = latestPost?.rendered?.html
+  ? shiftHeadingLevels(latestPost.rendered.html, 2)
+  : "";
 ---
 
-<BaseLayout pageTitle={pageTitle}>
+<BaseLayout pageTitle={pageTitle} pageTitleLevel={1}>
   <h2>Hello and Welcome!</h2>
   <p>
     I'm Kyle Hebert, an engineering leader who spends a lot of time connecting
@@ -34,9 +35,9 @@ const LatestContent = latestPost ? (await render(latestPost)).Content : null;
         <h3>
           <a href={`/posts/${latestPost.id}/`}>{latestPost.data.title}</a>
         </h3>
-        {LatestContent && (
+        {latestPostHtml && (
           <div class="latest-post-content">
-            <LatestContent />
+            <div set:html={latestPostHtml} />
           </div>
         )}
         <p>
@@ -57,44 +58,34 @@ const LatestContent = latestPost ? (await render(latestPost)).Content : null;
       line-height: 1.625rem;
     }
 
-    .latest-post h3 a {
-      text-decoration: none;
-    }
-
     .latest-post-content :global(h1) {
       font-size: 1.5rem;
       line-height: 1.875rem;
-      margin-top: 1.5rem;
     }
 
     .latest-post-content :global(h2) {
       font-size: 1.25rem;
       line-height: 1.625rem;
-      margin-top: 1.25rem;
     }
 
     .latest-post-content :global(h3) {
       font-size: 1.125rem;
       line-height: 1.5rem;
-      margin-top: 1.125rem;
     }
 
     .latest-post-content :global(h4) {
       font-size: 1rem;
       line-height: 1.375rem;
-      margin-top: 1rem;
     }
 
     .latest-post-content :global(h5) {
       font-size: 0.95rem;
       line-height: 1.25rem;
-      margin-top: 0.875rem;
     }
 
     .latest-post-content :global(h6) {
       font-size: 0.9rem;
       line-height: 1.125rem;
-      margin-top: 0.75rem;
     }
 
     .latest-post-content :global(p:nth-of-type(3) ~ *) {

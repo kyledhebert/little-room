@@ -1,28 +1,48 @@
 ---
-import { render } from "astro:content";
-
 import BaseLayout from "../layouts/BaseLayout.astro";
 import BlogPost from "../components/BlogPost.astro";
 import { splitRecentBlogPosts } from "../lib/blog";
+import { shiftHeadingLevels } from "../lib/markdown";
 
 const pageTitle = "The Little Room";
 const { recent: recentPosts, older: olderPosts } = await splitRecentBlogPosts(1);
 
-const recentPostsWithContent = await Promise.all(
-  recentPosts.map(async (post: any) => {
-    const { Content } = await render(post);
-    return { post, Content };
-  })
-);
+const recentPostsWithHtml = recentPosts.map((post: any) => ({
+  post,
+  html: post.rendered?.html ? shiftHeadingLevels(post.rendered.html, 1) : "",
+}));
 ---
 
-<BaseLayout pageTitle={pageTitle}>
-    {recentPostsWithContent.map(({ post, Content }: any) => (
-      <article>
-        <h3><a href={`/posts/${post.id}/`}>{post.data.title}</a></h3>
-        <p>{post.data.description}</p>
-        <Content />
-      </article>
+<BaseLayout pageTitle={pageTitle} pageTitleLevel={1}>
+  <div class="content">
+    {recentPostsWithHtml.map(({ post, html }: any) => (
+      <blockquote>
+      <em>
+        Well, you're in your little room, and you're working on something good<br>
+        But if it's really good, you're gonna need a bigger room<br>
+        And when you're in the bigger room, you might not know what to do<br>
+        You might have to think of how you got started sitting in your little room
+      </em>
+      <p>- "Little Room" by the White Stripes</p>
+      </blockquote>
+    <p>This is a place where I'll post writing of my own. Mostly essays and short notes and my weekly retros.
+      It's named after <a href="https://genius.com/The-white-stripes-little-room-lyrics">the White Stripes song</a> of the same name. I heard it year's ago, and I've used the name for various incarnations of my blog over the years. 
+    </p>
+    <article>
+      <h2>
+        <a href={`/posts/${post.id}/`}>{post.data.title}</a>
+        <p class="pub-date">
+          {
+            post.data.pubDate.toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            })
+          }
+        </p>
+      </h2>
+      {html && <div set:html={html} />}
+    </article>
     ))}
 
 
@@ -40,9 +60,32 @@ const recentPostsWithContent = await Promise.all(
         ))}
       </ul>
   )}
+  </div>
   <style>
-    a {
-      text-decoration: none;
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .content {
+      font-size: 1.25rem;
+    }
+
+    .pub-date {
+      display: inline-flex;
+      align-items: center;
+      position: relative;
+      top: -0.05em;
+      margin: 0;
+      padding: 0.15rem 0.65rem;
+      border-radius: 999px;
+      background-color: var(--aquamarine);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      line-height: 1;
+      white-space: nowrap;
     }
   </style>
 

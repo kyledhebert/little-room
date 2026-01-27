@@ -6,8 +6,10 @@ import "../styles/global.css";
 
 interface Props {
   pageTitle: string;
+  pageTitleLevel?: 1 | 2 | 3 | 4 | 5 | 6;
 }
-const { pageTitle } = Astro.props;
+const { pageTitle, pageTitleLevel = 1 } = Astro.props;
+const TitleTag = `h${pageTitleLevel}`;
 ---
 
 <html lang="en">
@@ -27,7 +29,7 @@ const { pageTitle } = Astro.props;
   <body>
     <Header />
     <main>
-      <h1>{pageTitle}</h1>
+      <TitleTag>{pageTitle}</TitleTag>
       <slot />
     </main>
     <Footer />
