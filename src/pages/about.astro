@@ -1,53 +1,57 @@
 ---
+import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import headshot from "../images/Hebert_Kyle_Default_Circle_Headshot.png";
 const pageTitle = "About Kyle";
-
-const identity = {
-  firstName: "Kyle",
-  country: "United States",
-  occupation: "Software Engineering Manager",
-  hobbies: ["reading", "video games", "tabletop games", "attending live shows"],
-};
-
-const skills = ["HTML", "CSS", "JavaScript", "React"];
-
-const happy = true;
-const finished = false;
-const goal = 3;
-
 ---
 
 <BaseLayout pageTitle={pageTitle}>
-
-
-  <p>What to even put here?</p>
-  <ul>
-    <li>My name is {identity.firstName}</li>
-    <li>
-      I live in {identity.country} where I work as a {identity.occupation}
-    </li>
-    {
-      identity.hobbies.length > 2 && (
-        <li>
-          Two of my hobbies are: {identity.hobbies[0]} and {identity.hobbies[1]}
-          .
-        </li>
-      )
+  <div class="about-layout">
+    <div class="headshot">
+      <Image src={headshot} alt="A headshot of Kyle Hebert" width="400" />
+    </div>
+    <div class="about-content">
+      <p>I am a software engineer who lives and works in Minneapolis, MN.</p>
+      <p>
+        This site hosts my <a href="/blog">personal writing</a> on technology, board and
+        video games, books and reading, and whatever strikes my fancy really.
+      </p>
+      <p>
+        I like to:
+        <ul>
+          <li>play video games</li>
+          <li>read books with my cat curled up on my lap</li>
+          <li>play board and card games</li>
+          <li>go to live concerts</li>
+          <li>watch British crime dramas</li>
+          <li>ride my Peloton bike</li>
+        </ul>
+        You can see what I'm currently doing and what media I'm consuming on my /now page.
+      </p>
+      <p>Check out the colophon if you're interested in the making of this site.</p>
+    </div>
+  </div>
+  <style>
+    .about-layout {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 2rem;
+      align-items: center;
     }
-  </ul>
-  <p>My skills include:</p>
-  <ul>
-    {skills.map((skill) => <li class="skill">{skill}</li>)}
-  </ul>
-  {happy && <p>I am happy to be learning Astro!</p>}
 
-  {finished && <p>I finished this tutorial!</p>}
+    .headshot {
+      margin: 0;
+      justify-self: start;
+    }
 
-  {
-    goal === 3 ? (
-      <p>My goal is to finish in 3 days.</p>
-    ) : (
-      <p>My goal is not 3 days.</p>
-    )
-  }
+    @media (max-width: 768px) {
+      .about-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .headshot {
+        justify-self: center;
+      }
+    }
+  </style>
 </BaseLayout>
