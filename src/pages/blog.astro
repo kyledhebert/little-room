@@ -14,20 +14,20 @@ const recentPostsWithHtml = recentPosts.map((post: any) => ({
 ---
 
 <BaseLayout pageTitle={pageTitle} pageTitleLevel={1}>
+  <blockquote>
+    <em>
+      Well, you're in your little room, and you're working on something good<br>
+      But if it's really good, you're gonna need a bigger room<br>
+      And when you're in the bigger room, you might not know what to do<br>
+      You might have to think of how you got started sitting in your little room
+    </em>
+    <p>- "Little Room" by the White Stripes</p>
+  </blockquote>
+  <p>This is a place where I'll post writing of my own. Mostly essays,short notes and my weekly retros.
+    It's named after <a href="https://genius.com/The-white-stripes-little-room-lyrics">the White Stripes song</a> of the same name. I heard it years ago, and I've used the name for various incarnations of my blog ever since.
+    To me it perfectly captures the essence of what I'm doing here: good work, in my little room, that'll maybe turn into something bigger. 
+  </p>
   <div class="content">
-      <blockquote>
-      <em>
-        Well, you're in your little room, and you're working on something good<br>
-        But if it's really good, you're gonna need a bigger room<br>
-        And when you're in the bigger room, you might not know what to do<br>
-        You might have to think of how you got started sitting in your little room
-      </em>
-      <p>- "Little Room" by the White Stripes</p>
-      </blockquote>
-    <p>This is a place where I'll post writing of my own. Mostly essays,short notes and my weekly retros.
-      It's named after <a href="https://genius.com/The-white-stripes-little-room-lyrics">the White Stripes song</a> of the same name. I heard it years ago, and I've used the name for various incarnations of my blog ever since.
-      To me it perfectly captures the essence of what I'm doing here: good work, in my little room, that'll maybe turn into something bigger. 
-    </p>
     {recentPostsWithHtml.map(({ post, html }: any) => (
     <article>
       <h2>
@@ -74,7 +74,7 @@ const recentPostsWithHtml = recentPosts.map((post: any) => ({
       margin: 0 0 2rem 0;
       border-bottom: 2px var(--page-fg) dashed ;
     }
-    
+
     .content {
       font-size: 1.25rem;
     }
