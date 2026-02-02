@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
+import { formatPubDate } from "../lib/dates";
 const { frontmatter } = Astro.props;
 ---
 
@@ -17,11 +18,7 @@ const { frontmatter } = Astro.props;
   <p class="pub-date">
     {
       frontmatter.published === true
-        ? `Published on ${frontmatter.pubDate.toLocaleDateString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-          })}`
+        ? `Published on ${formatPubDate(frontmatter.pubDate)}`
         : "Draft"
     }
   </p>

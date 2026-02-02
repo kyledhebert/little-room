@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { getLatestBlogPost, getRelativeDate } from "../lib/blog";
+import { getLatestBlogPost } from "../lib/blog";
+import { getRelativeDate } from "../lib/dates";
 import { shiftHeadingLevels } from "../lib/markdown";
 const pageTitle = "Kyle Hebert";
 const latestPost = await getLatestBlogPost();

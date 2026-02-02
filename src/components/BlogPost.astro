@@ -1,4 +1,6 @@
 ---
+import { formatPubDate } from "../lib/dates";
+
 interface Props {
   title: string;
   url: string;
@@ -14,13 +16,7 @@ const { title, url, description, pubDate, published } = Astro.props;
   {description ? <p class="description">{description}</p> : null}
   <p class="pub-date">
     {
-      published === true
-        ? `Published on ${pubDate.toLocaleDateString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-          })}`
-        : "Draft"
+      published === true ? `Published on ${formatPubDate(pubDate)}` : "Draft"
     }
   </p>
 </li>
