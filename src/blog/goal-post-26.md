@@ -1,6 +1,7 @@
 ---
 title: '2026 Goals'
 pubDate: 2026-01-22
+published: true
 description: 'I lay out my goals for the year. They range in ambition and scope.'
 author: 'Kyle Hebert'
 ---

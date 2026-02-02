@@ -4,7 +4,8 @@ let cachedPosts: Promise<CollectionEntry<"blog">[]> | null = null;
 
 const getAllBlogPosts = () => {
   if (!cachedPosts) {
-    cachedPosts = getCollection("blog");
+    const isProd = import.meta.env.PROD;
+    cachedPosts = getCollection("blog", ({ data }) => !isProd || data.published === true);
   }
 
   return cachedPosts;

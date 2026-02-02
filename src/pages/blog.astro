@@ -34,11 +34,13 @@ const recentPostsWithHtml = recentPosts.map((post: any) => ({
         <a href={`/posts/${post.id}/`}>{post.data.title}</a>
         <p class="pub-date">
           {
-            post.data.pubDate.toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })
+            post.data.published === true
+              ? post.data.pubDate.toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              : "Draft"
           }
         </p>
       </h2>
@@ -57,6 +59,7 @@ const recentPostsWithHtml = recentPosts.map((post: any) => ({
             title={post.data.title}
             description={post.data.description}
             pubDate={post.data.pubDate}
+            published={post.data.published}
           />
         ))}
       </ul>

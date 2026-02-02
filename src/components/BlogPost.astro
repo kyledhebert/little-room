@@ -4,20 +4,23 @@ interface Props {
   url: string;
   description?: string;
   pubDate: Date;
+  published?: boolean;
 }
-const { title, url, description, pubDate } = Astro.props;
+const { title, url, description, pubDate, published } = Astro.props;
 ---
 
 <li>
   <a href={url}>{title}</a>
   {description ? <p class="description">{description}</p> : null}
   <p class="pub-date">
-    Published on {
-      pubDate.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      })
+    {
+      published === true
+        ? `Published on ${pubDate.toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })}`
+        : "Draft"
     }
   </p>
 </li>

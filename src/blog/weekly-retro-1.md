@@ -1,6 +1,7 @@
 ---
 title: 'Weekly Retro #1'
 pubDate: 2026-01-27
+published: true
 description: 'My first weekly review of 2026. Yes I know it&apos;s week five already.'
 author: 'Kyle Hebert'
 ---

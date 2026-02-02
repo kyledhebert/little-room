@@ -15,12 +15,14 @@ const { frontmatter } = Astro.props;
   }
   <slot />
   <p class="pub-date">
-    Published on {
-      frontmatter.pubDate.toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      })
+    {
+      frontmatter.published === true
+        ? `Published on ${frontmatter.pubDate.toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })}`
+        : "Draft"
     }
   </p>
 </BaseLayout>

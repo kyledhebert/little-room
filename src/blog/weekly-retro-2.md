@@ -1,6 +1,7 @@
 ---
 title: "Weekly Retro #2"
 pubDate: 2026-02-01
+published: true
 description: "January is over. Rectangular February is here"
 author: "Kyle Hebert"
 ---
