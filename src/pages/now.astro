@@ -1,0 +1,30 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { formatPubDate } from "../lib/dates";
+const pageTitle = "Now";
+---
+
+<BaseLayout pageTitle={pageTitle}>
+  <p>
+    This page is inspired by Derek Siver's <a href="https://nownownow.com/"
+      >now page movement</a
+    >. It's where I'll post&mdash;well&mdash;what I'm doing now.
+  </p>
+  <h2>Now Playing</h2>
+  <ul>
+    <li>Monster Hunter Wilds</li>
+    <li>Atelier Ryza: Ever Darkness and The Secret Hideout</li>
+    <li>The Finals</li>
+  </ul>
+  <h2>Now Reading</h2>
+  <ul>
+    <li>Birnam Wood by Elanor Catton</li>
+    <li>White Cat, Black Dog by Kelly Link</li>
+  </ul>
+  <h2>Now Watching</h2>
+  <ul>
+    <li>Prime Suspect</li>
+    <li>The Good Place</li>
+  </ul>
+  <p class="pub-date">Updated on February 1, 2026</p>
+</BaseLayout>
