@@ -84,10 +84,18 @@ footer {
   margin: 0 auto;
 }
 
-  .pub-date {
-    font-size: 0.875rem;
-    margin-top: 0;
-  }
+.pub-date {
+  font-size: 0.875rem;
+  margin-top: 0;
+}
+
+.footer-links > * + *::before {
+  content: "|";
+  margin-right: 0.5rem;
+  text-decoration: none;
+  display: inline-block;
+  pointer-events: none;
+}
 
 /* nav styles */
 
@@ -143,3 +151,4 @@ footer {
     display: none;
   }
 }
+

@@ -1,0 +1,27 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+const pageTitle = "Colophon";
+---
+
+<BaseLayout pageTitle={pageTitle}>
+  <h2>Technical</h2>
+  <p>This site is built using <a href="https://astro.build/">Astro</a>. I chose
+  it because it isn't React-based (which I spend a lot of my day job writing)
+  but React-like enough that I could get up and running quickly. I've followed
+  Astro for years and love what its maintainers are doing in this very crowded
+  web framework space. For the most part the site plain ol' HTML and CSS with
+  minimal JavaScript, and a sprinkling of Astro goodness.
+  </p>
+  The site is published every time a change is merged to the main branch of <a href="https://github.com/kyledhebert/little-room">this repo</a> using
+  <a href="https://www.netlify.com/integrations/github/">Netlify's very slick Github
+  integration.</a></p>
+  <h2>Typographical</h2>
+  <p>I use three different fonts on the site:</p>
+  <p>One of them is <a href="https://djr.com/bungee">Bungee</a>, designed by David Jonathan Ross. It's a typeface that's inspired by the neon signs you might find in any city. Bungee's specific use case is vertical typography, but I love it for horizontal usage as well. I use it as my "display" font.</p>
+  <p>Another is <a href="https://huertatipografica.com/en/fonts/bitter-ht">Bitter</a>, which I use as my "serif" font, and the primary font you'll see on the site. Bitter is designed by Huerta Tipografica. It's a font designed for reading on the screen and e-ink readers.</p>
+  <p>Finally, as my "sans-serif" font I use <a href="https://github.com/jpt/barlow">Barlow Condensed</a>, designed by Jeremy Tribby. I use this one in the navigation menu, the date stamp on the blog page, and various other places. Barlow is a grotesk type family, inspired by "the visual style of the California public".</p>
+  <p>The fonts are all served by <a href="https://fonts.bunny.net/">Bunny Fonts</a> using <a href="https://docs.astro.build/en/reference/experimental-flags/fonts/">Astro's fonts API.</a> And yes, I know they all start with the letter B.</p>
+
+  
+  
+</BaseLayout>
