@@ -35,10 +35,10 @@ body {
   width: 100%;
   max-width: 80ch;
   padding: 1rem;
-  line-height: 1.75;
+  line-height: 1.6;
   font-family: var(--font-serif), serif;
   font-weight: 500;
-  font-size: 1.5rem;
+  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
 }
 
 * {
@@ -51,16 +51,26 @@ h1, h2, h3 {
 
 h1 {
   margin: 1rem 0;
-  font-size: 3.5rem;
+  font-size: clamp(2.1rem, 6vw, 3rem);
 }
 
-h2, h3, h4 {
+:is(h2, h3, h4) {
   margin-bottom: 0.35rem;
 }
 
-h2 + p,
-h3 + p,
-h4 + p {
+h2 {
+  font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+}
+
+h3 {
+  font-size: clamp(1.15rem, 3vw, 1.5rem);
+}
+
+h4 {
+  font-size: clamp(1rem, 2.6vw, 1.25rem);
+}
+
+:is(h2, h3, h4) + p {
   margin-top: 0.35rem;
 }
 
@@ -71,6 +81,9 @@ a {
 header nav {
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
 }
 
 main {
@@ -85,7 +98,7 @@ footer {
 }
 
 .pub-date {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   margin-top: 0;
 }
 
@@ -99,28 +112,22 @@ footer {
 
 /* nav styles */
 
-.menu {
-  background-color: var(--nav-bg);
-  border: none;
-  color: var(--nav-fg);
-  font-size: 1.2rem;
-  font-weight: bold;
-  padding: 5px 10px;
-}
-
 .nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   width: 100%;
-  display: none;
   margin: 0 auto;
+  gap: 0.35rem 1rem;
+  font-size: clamp(0.85rem, 2.4vw, 1rem);
 }
 
 .nav-links a {
-  display: block;
+  display: inline-block;
   text-align: center;
-  padding: 10px 0;
+  padding: 0.5rem 0.65rem;
   text-decoration: none;
   font-family: var(--font-sans), sans-serif;
-  font-size: 1.2rem;
   text-transform: uppercase;
   color: var(--nav-link-fg);
 }
@@ -130,25 +137,9 @@ footer {
   background-color: var(--nav-link-hover-bg);
 }
 
-:has(.menu[aria-expanded="true"]) .nav-links {
-  display: unset;
-}
-
 @media screen and (min-width: 636px) {
   .nav-links {
-    display: block;
-    position: static;
     width: auto;
-    background: none;
-  }
-
-  .nav-links a {
-    display: inline-block;
-    padding: 15px 20px;
-  }
-
-  .menu {
-    display: none;
   }
 }
 
