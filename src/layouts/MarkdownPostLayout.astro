@@ -14,7 +14,9 @@ const { frontmatter } = Astro.props;
       />
     )
   }
-  <slot />
+  <div class="post-content">
+    <slot />
+  </div>
   <p class="pub-date">
     {
       frontmatter.published === true
@@ -25,4 +27,20 @@ const { frontmatter } = Astro.props;
 </BaseLayout>
 
 <style>
+  .post-content :global(img) {
+    max-width: 500px;
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+    border-radius: 0.35rem;
+  }
+
+  .post-content :global(.post-caption) {
+    max-width: 500px;
+    margin: 0.5rem auto 1.5rem;
+    font-size: 0.95rem;
+    text-align: center;
+    color: var(--page-fg);
+  }
 </style>

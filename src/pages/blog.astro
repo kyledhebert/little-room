@@ -8,9 +8,17 @@ import { shiftHeadingLevels } from "../lib/markdown";
 const pageTitle = "The Little Room";
 const { recent: recentPosts, older: olderPosts } = await splitRecentBlogPosts(5);
 
+const stripPostCaptions = (html: string) =>
+  html
+    .replace(/<p[^>]*class="post-caption"[^>]*>[\s\S]*?<\/p>/g, "")
+    .replace(/<p>\s*<img[^>]*>\s*<\/p>/g, "")
+    .replace(/<p>\s*<\/p>/g, "");
+
 const recentPostsWithHtml = recentPosts.map((post: any) => ({
   post,
-  html: post.rendered?.html ? shiftHeadingLevels(post.rendered.html, 1) : "",
+  html: post.rendered?.html
+    ? stripPostCaptions(shiftHeadingLevels(post.rendered.html, 1))
+    : "",
 }));
 ---
 
