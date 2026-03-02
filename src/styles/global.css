@@ -78,6 +78,11 @@ a {
   color: var(--link-color);
 }
 
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 header nav {
   display: flex;
   align-items: center;
