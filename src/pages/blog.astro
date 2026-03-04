@@ -3,16 +3,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import BlogPost from "../components/BlogPost.astro";
 import { splitRecentBlogPosts } from "../lib/blog";
 import { formatPubDate } from "../lib/dates";
+import { stripPostCaptions } from "../lib/html";
 import { shiftHeadingLevels } from "../lib/markdown";
 
 const pageTitle = "The Little Room";
 const { recent: recentPosts, older: olderPosts } = await splitRecentBlogPosts(5);
-
-const stripPostCaptions = (html: string) =>
-  html
-    .replace(/<p[^>]*class="post-caption"[^>]*>[\s\S]*?<\/p>/g, "")
-    .replace(/<p>\s*<img[^>]*>\s*<\/p>/g, "")
-    .replace(/<p>\s*<\/p>/g, "");
 
 const recentPostsWithHtml = recentPosts.map((post: any) => ({
   post,

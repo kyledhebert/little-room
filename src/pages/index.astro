@@ -2,11 +2,12 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getLatestBlogPost } from "../lib/blog";
 import { getRelativeDate } from "../lib/dates";
+import { stripPostCaptions } from "../lib/html";
 import { shiftHeadingLevels } from "../lib/markdown";
 const pageTitle = "Kyle Hebert";
 const latestPost = await getLatestBlogPost();
 const latestPostHtml = latestPost?.rendered?.html
-  ? shiftHeadingLevels(latestPost.rendered.html, 2)
+  ? stripPostCaptions(shiftHeadingLevels(latestPost.rendered.html, 2))
   : "";
 ---
 
