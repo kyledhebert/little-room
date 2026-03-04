@@ -1,9 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getLatestBlogPost } from "../lib/blog";
-import { getRelativeDate } from "../lib/dates";
 import { stripPostCaptions } from "../lib/html";
 import { shiftHeadingLevels } from "../lib/markdown";
+import relativeDateScriptUrl from "../scripts/relative-date.ts?url";
 const pageTitle = "Kyle Hebert";
 const latestPost = await getLatestBlogPost();
 const latestPostHtml = latestPost?.rendered?.html
@@ -30,7 +30,15 @@ const latestPostHtml = latestPost?.rendered?.html
     I live in Minneapolis, but I was born and raised in Louisiana. It's
     pronounced a-bear.
   </p>
-  <p>Here's what I wrote {getRelativeDate(latestPost.data.pubDate)}:</p>
+  <p>
+    Here's what I wrote
+    <span
+      class="relative-date"
+      data-pub-date={latestPost.data.pubDate.toISOString()}
+    >
+      recently
+    </span>:
+  </p>
   {
     latestPost ? (
       <div class="latest-post">
@@ -52,6 +60,7 @@ const latestPostHtml = latestPost?.rendered?.html
       <p>No posts yet.</p>
     )
   }
+  <script type="module" src={relativeDateScriptUrl}></script>
   <style>
     .latest-post {
       font-size: 1.25rem;
