@@ -1,9 +1,12 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
 
+import netlify from "@astrojs/netlify";
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://kylehebert.net/",
+  output: "static",
   experimental: {
     fonts: [{
       provider: fontProviders.bunny(),
@@ -21,5 +24,7 @@ export default defineConfig({
       cssVariable: "--font-sans"
     }
     ]
-  }
+  },
+
+  adapter: netlify()
 });
