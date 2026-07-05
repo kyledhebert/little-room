@@ -1,5 +1,5 @@
 ---
-title: "Weekly Retro #21"
+title: "Weekly Retro #22"
 pubDate: 2026-06-21
 published: true
 description: "The extra day off did some heavy lifting"
