@@ -4,7 +4,11 @@ import { formatPubDate } from "../lib/dates";
 const { frontmatter } = Astro.props;
 ---
 
-<BaseLayout pageTitle={frontmatter.title}>
+<BaseLayout
+  pageTitle={frontmatter.title}
+  description={frontmatter.description}
+  pageType="article"
+>
   {
     frontmatter.image?.url && (
       <img

@@ -7,9 +7,22 @@ import "../styles/global.css";
 interface Props {
   pageTitle: string;
   pageTitleLevel?: 1 | 2 | 3 | 4 | 5 | 6;
+  description?: string;
+  socialImage?: string;
+  socialImageAlt?: string;
+  pageType?: "website" | "article";
 }
-const { pageTitle, pageTitleLevel = 1 } = Astro.props;
+const {
+  pageTitle,
+  pageTitleLevel = 1,
+  description = "Notes on software, hobbies, and life from Kyle Hebert.",
+  socialImage = "/social-preview.png",
+  socialImageAlt = "The Little Room, a blog about software, hobbies, and life by Kyle Hebert.",
+  pageType = "website",
+} = Astro.props;
 const TitleTag = `h${pageTitleLevel}`;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
+const socialImageUrl = new URL(socialImage, Astro.site);
 ---
 
 <html lang="en">
@@ -21,6 +34,21 @@ const TitleTag = `h${pageTitleLevel}`;
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <meta property="og:type" content={pageType} />
+    <meta property="og:site_name" content="Kyle Hebert" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={socialImageUrl} />
+    <meta property="og:image:secure_url" content={socialImageUrl} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={socialImageAlt} />
+
     <Font cssVariable="--font-display" />
     <Font cssVariable="--font-serif" />
     <Font cssVariable="--font-sans" />
