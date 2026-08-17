@@ -1,43 +1,243 @@
-# Astro Starter Kit: Minimal
+# The Little Room
 
-```sh
-npm create astro@latest -- --template minimal
+Personal Astro site for `kylehebert.net`.
+
+The main feature is the blog. The production content source is intended to be
+AT Protocol records using the Standard.site lexicons:
+
+- `site.standard.publication` for the site/publication record
+- `site.standard.document` for individual posts
+
+Markdown is still the authoring format, but once a post is published the PDS
+record is the production source of truth.
+
+## Local Development
+
+Install dependencies:
+
+```bash
+npm install
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Run the dev server:
 
-## 🚀 Project Structure
+```bash
+npm run dev
+```
 
-Inside of your Astro project, you'll see the following folders and files:
+When `BLOG_SOURCE` is unset locally, the blog loader defaults to local Markdown
+from `src/blog`. This keeps normal editing and previewing simple.
+
+To build from local Markdown explicitly:
+
+```bash
+BLOG_SOURCE=local ASTRO_TELEMETRY_DISABLED=1 npm run build
+```
+
+To build from PDS records:
+
+```bash
+BLOG_SOURCE=pds \
+ATPROTO_REPO=your.handle \
+ATPROTO_SERVICE=https://bsky.social \
+ATPROTO_PUBLICATION_URI=at://did:.../site.standard.publication/main \
+ASTRO_TELEMETRY_DISABLED=1 \
+npm run build
+```
+
+`BLOG_SOURCE=pds` never falls back to local Markdown. If PDS config is missing or
+no valid records are loaded, the build should fail.
+
+## Blog Source Model
+
+The Astro collection is still named `blog`, but it is loaded through
+`siteStandardDocumentLoader()` in `src/content.config.ts`.
+
+Modes:
+
+- `BLOG_SOURCE=local`: load Markdown from `src/blog`
+- `BLOG_SOURCE=pds`: load `site.standard.document` records from the PDS
+- unset locally: default to local Markdown
+- unset on Netlify/CI: fail
+
+The pages should continue to use normal Astro content APIs:
+
+- `getCollection("blog")`
+- `render(post)`
+
+Avoid adding a second blog data path.
+
+## Publishing Setup
+
+Publishing to the PDS is done locally. Netlify only needs read-only config for
+builds.
+
+Local publishing env:
+
+```bash
+ATPROTO_HANDLE=your.handle
+ATPROTO_PASSWORD=
+ATPROTO_SERVICE=https://bsky.social
+SITE=https://kylehebert.net
+```
+
+These values live in `.env`, which is gitignored. The Astro commands load it
+through Vite, and the ATproto scripts load it with Node's built-in
+`--env-file=.env` support.
+
+Leave `ATPROTO_PASSWORD` blank if you do not want the app password stored in a
+file. Commands that need to write to the PDS will prompt for it when missing.
+
+Create the publication record once:
+
+```bash
+npm run atproto:publication
+```
+
+Save the printed `at://.../site.standard.publication/main` value:
+
+```bash
+ATPROTO_PUBLICATION_URI=at://did:.../site.standard.publication/main
+```
+
+Netlify production env:
+
+```bash
+BLOG_SOURCE=pds
+ATPROTO_REPO=your.handle
+ATPROTO_SERVICE=https://bsky.social
+ATPROTO_PUBLICATION_URI=at://did:.../site.standard.publication/main
+```
+
+Do not put `ATPROTO_PASSWORD` in Netlify for the current setup.
+
+## Normal Post Workflow
+
+Write the post in Markdown and keep it committed if you want the source copy in
+Git.
+
+Publish one post to the PDS:
+
+```bash
+npm run atproto:publish:post -- src/blog/my-post.md
+```
+
+Commit the Markdown source and any generated public images:
+
+```bash
+git add src/blog/my-post.md public/images
+git commit -m "add my post"
+git push
+```
+
+The important order is: publish to the PDS before merging/deploying the code
+that expects that post and its generated images to exist.
+
+## One-Time Import
+
+Import all existing Markdown posts:
+
+```bash
+npm run atproto:import -- src/blog
+```
+
+This prompts before writing records:
 
 ```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+This will publish 29 records from src/blog to your PDS. Continue? [y/N]
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+For deliberate non-interactive migration:
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+```bash
+npm run atproto:import:yes -- src/blog
+```
 
-Any static assets, like images, can be placed in the `public/` directory.
+Records use deterministic keys based on the Markdown filename, so rerunning
+import updates existing records instead of creating duplicates. It will still
+refresh `updatedAt` and rewrite records with the current script behavior.
 
-## 🧞 Commands
+## Images
 
-All commands are run from the root of the project, from a terminal:
+Full-size original images live in `src/images` and remain committed.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+Publishable web images live in `public/images` and are generated by the
+ATproto publish/import/validate scripts using `sharp`.
 
-## 👀 Want to learn more?
+During publish/import:
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- Markdown image references are rewritten to absolute URLs such as
+  `https://kylehebert.net/images/foo.webp`
+- large raster images are converted to `.webp`
+- generated files are written to `public/images`
+- post frontmatter `image.url` is rewritten to the public URL
+- post-specific frontmatter images are uploaded as Standard.site `coverImage`
+  blobs when possible
+
+The default site social image, `/social-preview.png`, is only for website social
+cards. It is not written into every PDS document.
+
+## ATproto Scripts
+
+Create/update the publication record:
+
+```bash
+npm run atproto:publication
+```
+
+Publish a single Markdown post:
+
+```bash
+npm run atproto:publish:post -- src/blog/my-post.md
+```
+
+Legacy alias for the same single-post publish:
+
+```bash
+npm run atproto:publish -- src/blog/my-post.md
+```
+
+Validate a Markdown post without writing to the PDS:
+
+```bash
+npm run atproto:validate -- src/blog/my-post.md
+```
+
+This validates frontmatter, rewrites image URLs in the generated record preview,
+and generates any needed `public/images` derivatives.
+
+Import all Markdown posts with confirmation:
+
+```bash
+npm run atproto:import -- src/blog
+```
+
+Import all Markdown posts without confirmation:
+
+```bash
+npm run atproto:import:yes -- src/blog
+```
+
+Create a post interactively:
+
+```bash
+npm run atproto:post
+```
+
+This is available, but the preferred workflow is still writing Markdown and
+publishing that file.
+
+## Validation Rules
+
+The publish/import scripts reject:
+
+- `published: false`
+- missing `title`
+- missing `pubDate` or `publishedAt`
+- local image references that cannot be resolved
+- non-portable image URLs in the final Markdown record
+- malformed required Standard.site fields
+
+`validate: false` is still used for the ATproto `putRecord` call because these
+are third-party lexicons, but the script validates the expected record shape
+before writing.

@@ -6,12 +6,21 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "atproto:publication": "node --env-file=.env scripts/atproto-blog.mjs publication",
+    "atproto:post": "node --env-file=.env scripts/atproto-blog.mjs post",
+    "atproto:publish": "node --env-file=.env scripts/atproto-blog.mjs publish",
+    "atproto:publish:post": "node --env-file=.env scripts/atproto-blog.mjs publish",
+    "atproto:import": "node --env-file=.env scripts/atproto-blog.mjs import",
+    "atproto:import:yes": "node --env-file=.env scripts/atproto-blog.mjs import --yes",
+    "atproto:validate": "node --env-file=.env scripts/atproto-blog.mjs validate"
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "^6.3.10",
     "@astrojs/netlify": "^6.6.4",
     "@astrojs/rss": "^4.0.15",
-    "astro": "^5.16.6"
+    "astro": "^5.16.6",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "netlify-cli": "^24.0.1"

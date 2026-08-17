@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
 import { formatPubDate } from "../lib/dates";
-const { frontmatter } = Astro.props;
+const { post, frontmatter = post.data } = Astro.props;
 ---
 
 <BaseLayout
@@ -9,6 +9,13 @@ const { frontmatter } = Astro.props;
   description={frontmatter.description}
   pageType="article"
 >
+  {
+    frontmatter.atUri && (
+      <Fragment slot="head">
+        <link rel="site.standard.document" href={frontmatter.atUri} />
+      </Fragment>
+    )
+  }
   {
     frontmatter.image?.url && (
       <img
