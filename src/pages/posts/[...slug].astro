@@ -1,7 +1,6 @@
 ---
-import { getCollection, render } from 'astro:content';
-
 import MarkdownPostLayout from '../../layouts/MarkdownPostLayout.astro';
+import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -14,6 +13,6 @@ const { post } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<MarkdownPostLayout frontmatter={post.data}>
+<MarkdownPostLayout post={post}>
   <Content />
 </MarkdownPostLayout>

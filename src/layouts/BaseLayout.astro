@@ -2,6 +2,7 @@
 import { Font } from "astro:assets";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import { publicationUri } from "../lib/site-standard";
 import "../styles/global.css";
 
 interface Props {
@@ -23,6 +24,7 @@ const {
 const TitleTag = `h${pageTitleLevel}`;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 const socialImageUrl = new URL(socialImage, Astro.site);
+const siteStandardPublicationUri = publicationUri();
 ---
 
 <html lang="en">
@@ -53,6 +55,12 @@ const socialImageUrl = new URL(socialImage, Astro.site);
     <Font cssVariable="--font-serif" />
     <Font cssVariable="--font-sans" />
     <title>{pageTitle}</title>
+    {
+      siteStandardPublicationUri && (
+        <link rel="site.standard.publication" href={siteStandardPublicationUri} />
+      )
+    }
+    <slot name="head" />
   </head>
   <body>
     <Header />

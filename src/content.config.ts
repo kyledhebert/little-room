@@ -1,23 +1,20 @@
-// Import the glob loader
-import { glob } from "astro/loaders";
-// Import utilities from `astro:content`
 import { defineCollection } from "astro:content";
-// Import Zod
-import { z } from "astro/zod";
-// Define a `loader` and `schema` for each collection
+import { loadEnv } from "vite";
+import { siteStandardDocumentLoader } from "./lib/site-standard-loader";
+
+const env = {
+  ...loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), ""),
+  ...process.env,
+};
+
 const blog = defineCollection({
-    loader: glob({ pattern: '**/[^_]*.md', base: "./src/blog" }),
-    schema: z.object({
-      title: z.string(),
-      published: z.boolean().default(false),
-      pubDate: z.date(),
-      description: z.string(),
-      author: z.string(),
-      image: z.object({
-        url: z.string(),
-        alt: z.string()
-      }).optional(),
-    })
+  loader: siteStandardDocumentLoader({
+    source: env.BLOG_SOURCE as "local" | "pds" | undefined,
+    repo: env.ATPROTO_REPO,
+    service: env.ATPROTO_SERVICE,
+    publicationUri: env.ATPROTO_PUBLICATION_URI,
+    siteUrl: env.SITE ?? "https://kylehebert.net",
+  }),
 });
-// Export a single `collections` object to register your collection(s)
+
 export const collections = { blog };

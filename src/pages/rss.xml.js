@@ -1,14 +1,12 @@
 import rss from '@astrojs/rss';
-import { pagesGlobToRssItems } from '@astrojs/rss';
-import { getCollection } from 'astro:content';
+import { getSortedBlogPosts } from '../lib/blog';
 
 export async function GET(context) {
-  const posts = await getCollection("blog");
+  const posts = await getSortedBlogPosts();
   return rss({
     title: 'The Little Room',
     description: 'The personal web log of Kyle Hebert',
     site: context.site,
-    items: await pagesGlobToRssItems(import.meta.glob('./**/*.md')),
     items: posts.map((post) => ({
       title: post.data.title,
       pubDate: post.data.pubDate,

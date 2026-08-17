@@ -4,16 +4,14 @@ export const prerender = false;
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getLatestBlogPost } from "../lib/blog";
 import { getRelativeDate } from "../lib/dates";
-import { stripPostCaptions } from "../lib/html";
-import { shiftHeadingLevels } from "../lib/markdown";
+import { render } from "astro:content";
 const pageTitle = "Kyle Hebert";
 const latestPost = await getLatestBlogPost();
 const latestPostRelativeDate = latestPost
   ? getRelativeDate(latestPost.data.pubDate)
   : "recently";
-const latestPostHtml = latestPost?.rendered?.html
-  ? stripPostCaptions(shiftHeadingLevels(latestPost.rendered.html, 2))
-  : "";
+const latestPostRender = latestPost ? await render(latestPost) : null;
+const LatestPostContent = latestPostRender?.Content;
 ---
 
 <BaseLayout pageTitle={pageTitle} pageTitleLevel={1}>
@@ -45,9 +43,9 @@ const latestPostHtml = latestPost?.rendered?.html
         <h3>
           <a href={`/posts/${latestPost.id}/`}>{latestPost.data.title}</a>
         </h3>
-        {latestPostHtml && (
+        {LatestPostContent && (
           <div class="latest-post-content">
-            <div set:html={latestPostHtml} />
+            <LatestPostContent />
           </div>
         )}
         <p>
@@ -99,6 +97,11 @@ const latestPostHtml = latestPost?.rendered?.html
     }
 
     .latest-post-content :global(p:nth-of-type(3) ~ *) {
+      display: none;
+    }
+
+    .latest-post-content :global(.post-caption),
+    .latest-post-content :global(p:has(img)) {
       display: none;
     }
 
