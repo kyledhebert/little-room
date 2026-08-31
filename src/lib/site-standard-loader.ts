@@ -176,8 +176,11 @@ export const siteStandardDocumentLoader = (options: LoaderOptions = {}): Loader 
         const markdownFiles = entries.filter((entry) => entry.endsWith(".md")).sort();
 
         for (const file of markdownFiles) {
-          const filePath = path.join(rootPath, file);
-          const sourceText = await readFile(filePath, "utf8");
+          const absoluteFilePath = path.join(rootPath, file);
+          const filePath = path
+            .relative(fileURLToPath(config.root), absoluteFilePath)
+            .replace(/\\/g, "/");
+          const sourceText = await readFile(absoluteFilePath, "utf8");
           const parsed = parseFrontmatter(sourceText);
           const markdown = rewriteRenderableMarkdownImages(parsed.content.trim(), siteUrl);
           const frontmatter = parsed.frontmatter;
