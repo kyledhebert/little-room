@@ -1,0 +1,99 @@
+---
+export const prerender = false;
+
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { adminConfigured, verifyAdminCookie } from "../../../lib/admin-auth";
+import { getPhotos } from "../../../lib/photos";
+
+const authenticated = Boolean(verifyAdminCookie(Astro.cookies.get("photo_admin")?.value));
+const published = Astro.url.searchParams.get("published") === "1";
+const error = Astro.url.searchParams.get("error");
+const photos = authenticated ? await getPhotos() : [];
+---
+
+<BaseLayout pageTitle="Photo Admin" description="Private photo publishing tools.">
+  {!adminConfigured() ? (
+    <p class="notice error">Set <code>ATPROTO_ADMIN_DID</code> and <code>ADMIN_SESSION_SECRET</code> to enable this page.</p>
+  ) : !authenticated ? (
+    <form method="post" action="/admin/photos/login" class="panel">
+      <label for="handle">AT Protocol handle</label>
+      <input id="handle" name="handle" autocomplete="username" required />
+      <button type="submit">Sign in with AT Protocol</button>
+    </form>
+  ) : (
+    <>
+      {published && <p class="notice success">Photo published successfully.</p>}
+      {error && <p class="notice error">{error}</p>}
+      <form method="post" action="/admin/photos/publish" enctype="multipart/form-data" class="panel">
+        <label for="photo">Photo</label>
+        <input id="photo" name="photo" type="file" accept="image/*" required />
+        <img id="preview" alt="Selected photo preview" hidden />
+
+        <label for="alt">Alt text <span>(required)</span></label>
+        <textarea id="alt" name="alt" rows="3" required></textarea>
+
+        <label for="caption">Caption / social post text</label>
+        <textarea id="caption" name="caption" rows="5" maxlength="2200"></textarea>
+        <small>Bluesky limits captions to 300 characters.</small>
+
+        <label for="takenAt">Date taken</label>
+        <input id="takenAt" name="takenAt" type="datetime-local" />
+
+        <fieldset>
+          <legend>Also publish to</legend>
+          <label><input type="checkbox" name="bluesky" /> Bluesky</label>
+          <label><input type="checkbox" name="instagram" /> Instagram</label>
+        </fieldset>
+
+        <button type="submit">Publish photo</button>
+      </form>
+      <form method="post" action="/admin/photos/logout" class="logout">
+        <button type="submit">Sign out</button>
+      </form>
+      <section class="existing">
+        <h2>Published photos</h2>
+        <p><a href="/photos/">Open the public photo feed</a></p>
+        {photos.length === 0 ? <p>No photos are available in this build yet.</p> : (
+          <div class="photo-grid">
+            {photos.map((photo) => (
+              <figure>
+                <img src={photo.data.imageUrl} alt={photo.data.alt} loading="lazy" />
+                {photo.data.caption && <figcaption>{photo.data.caption}</figcaption>}
+              </figure>
+            ))}
+          </div>
+        )}
+      </section>
+      <script>
+        const input = document.querySelector<HTMLInputElement>("#photo");
+        const preview = document.querySelector<HTMLImageElement>("#preview");
+        input?.addEventListener("change", () => {
+          const file = input.files?.[0];
+          if (!file || !preview) return;
+          preview.src = URL.createObjectURL(file);
+          preview.hidden = false;
+        });
+      </script>
+    </>
+  )}
+</BaseLayout>
+
+<style>
+  .panel { display: grid; gap: 0.75rem; max-width: 36rem; padding: 1rem; background: var(--surface-bg); border: 2px solid var(--page-fg); }
+  label, legend, button { font-family: var(--font-sans), sans-serif; font-weight: 700; }
+  label span { font-weight: 400; }
+  input, textarea, button { font: inherit; padding: 0.55rem; }
+  textarea { resize: vertical; }
+  fieldset { display: flex; gap: 1.25rem; }
+  #preview { max-height: 24rem; object-fit: contain; background: var(--border-color); }
+  button { width: fit-content; cursor: pointer; }
+  .notice { padding: 0.7rem; border: 2px solid; }
+  .success { background: var(--aquamarine); }
+  .error { background: #ffd5d5; }
+  .logout { margin-top: 1.5rem; }
+  .existing { margin-top: 2rem; }
+  .photo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; }
+  figure { margin: 0; }
+  figure img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+  figcaption { font-size: 0.85rem; margin-top: 0.3rem; }
+</style>

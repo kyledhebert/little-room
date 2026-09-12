@@ -177,6 +177,80 @@ During publish/import:
 The default site social image, `/social-preview.png`, is only for website social
 cards. It is not written into every PDS document.
 
+## Photo Publishing
+
+Photos are stored as `net.kylehebert.photo` records and displayed at `/photos/`.
+Publishing to the PDS is mandatory; Instagram is opt-in per photo:
+
+```bash
+npm run atproto:publish:photo -- path/to/photo.jpg \
+  --alt "A useful visual description" \
+  --caption "An optional caption"
+```
+
+To also publish the photo to Instagram:
+
+```bash
+npm run atproto:publish:photo -- path/to/photo.jpg \
+  --alt "A useful visual description" \
+  --caption "An optional caption" \
+  --instagram
+```
+
+The command strips image metadata, converts the image to JPEG, and keeps it
+under one megabyte. It writes the photo record before it attempts the optional
+Instagram post. A filename-derived record key makes the
+PDS write repeatable; use `--key` to choose a different key.
+A successful Instagram destination is saved back onto the photo record, so a
+retry will not create a duplicate Instagram post.
+
+### Web photo admin
+
+The private `/admin/photos/` route provides an image preview, alt text, caption,
+date, and optional Instagram and Bluesky checkboxes. The caption becomes the
+post text on either selected social network. Publishing to the PDS always
+happens first.
+
+Authentication uses AT Protocol OAuth. Only the DID configured in
+`ATPROTO_ADMIN_DID` may finish signing in, and the granted token is limited to
+creating/updating photo records, uploading blobs, and creating Bluesky posts.
+It does not request delete access. OAuth state and session data are kept in
+Netlify Blobs; no PDS password is stored on Netlify.
+
+Configure these server-side production variables:
+
+```bash
+PUBLIC_URL=https://kylehebert.net
+ATPROTO_ADMIN_DID=did:plc:your-did
+ADMIN_SESSION_SECRET=a-long-random-value
+```
+
+During `astro dev`, OAuth uses AT Protocol's loopback-client mode and defaults
+to `http://127.0.0.1:4321`. If you run the dev server on another port, set
+`LOCAL_PUBLIC_URL` to that exact origin.
+
+To rebuild the static photo feed immediately after publishing, create a Netlify
+build hook and store its URL as `NETLIFY_BUILD_HOOK`. Without it, a photo still
+reaches the PDS and any selected social destinations, but appears on `/photos/`
+after the next deployment.
+
+The Instagram variables above and `NETLIFY_BUILD_HOOK` are runtime secrets.
+Keep them scoped to production functions and out of the repository. Bluesky
+publishing uses the signed-in OAuth session and needs no separate password.
+
+Instagram publishing requires a professional account configured for the
+Instagram API and these additional local variables:
+
+```bash
+INSTAGRAM_USER_ID=
+INSTAGRAM_ACCESS_TOKEN=
+INSTAGRAM_GRAPH_URL=https://graph.instagram.com
+INSTAGRAM_GRAPH_VERSION=v23.0
+```
+
+Only `ATPROTO_REPO` and `ATPROTO_SERVICE` are needed at build time to load the
+photo feed. Social credentials remain local and should not be added to Netlify.
+
 ## ATproto Scripts
 
 Create/update the publication record:

@@ -1,6 +1,7 @@
 import { defineCollection } from "astro:content";
 import { loadEnv } from "vite";
 import { siteStandardDocumentLoader } from "./lib/site-standard-loader";
+import { photoLoader } from "./lib/photo-loader";
 
 const env = {
   ...loadEnv(process.env.NODE_ENV ?? "development", process.cwd(), ""),
@@ -17,4 +18,11 @@ const blog = defineCollection({
   }),
 });
 
-export const collections = { blog };
+const photos = defineCollection({
+  loader: photoLoader({
+    repo: env.ATPROTO_REPO,
+    service: env.ATPROTO_SERVICE,
+  }),
+});
+
+export const collections = { blog, photos };

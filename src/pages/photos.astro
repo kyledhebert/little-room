@@ -1,0 +1,69 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getPhotos } from "../lib/photos";
+
+const photos = await getPhotos();
+---
+
+<BaseLayout pageTitle="Photos" description="Photos from Kyle Hebert.">
+  {photos.length === 0 ? (
+    <p>No photos yet.</p>
+  ) : (
+    <div class="photo-feed">
+      {photos.map((photo) => (
+        <figure>
+          <img
+            src={photo.data.imageUrl}
+            alt={photo.data.alt}
+            width={photo.data.width}
+            height={photo.data.height}
+            loading="lazy"
+            decoding="async"
+          />
+          {(photo.data.caption || photo.data.createdAt) && (
+            <figcaption>
+              {photo.data.caption && <span>{photo.data.caption}</span>}
+              <time datetime={photo.data.createdAt.toISOString()}>
+                {photo.data.createdAt.toLocaleDateString("en-US", { dateStyle: "long" })}
+              </time>
+            </figcaption>
+          )}
+        </figure>
+      ))}
+    </div>
+  )}
+</BaseLayout>
+
+<style>
+  .photo-feed {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    align-items: start;
+    gap: 1.5rem;
+  }
+
+  figure {
+    margin: 0;
+    padding: 0.65rem;
+    background: var(--surface-bg);
+    border: 2px solid var(--page-fg);
+    box-shadow: 0.35rem 0.35rem 0 var(--aquamarine);
+  }
+
+  img {
+    display: block;
+    width: 100%;
+  }
+
+  figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-top: 0.65rem;
+  }
+
+  time {
+    font-family: var(--font-sans), sans-serif;
+    font-size: 0.8rem;
+  }
+</style>
