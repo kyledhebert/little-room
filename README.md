@@ -258,6 +258,15 @@ INSTAGRAM_GRAPH_VERSION=v23.0
 Only `ATPROTO_REPO` and `ATPROTO_SERVICE` are needed at build time to load the
 photo feed. Social credentials remain local and should not be added to Netlify.
 
+To preview the feed with several temporary photos during local development:
+
+```bash
+PHOTO_MOCKS=true npm run dev
+```
+
+The fixtures use existing site images and are enabled only when that explicit
+flag is set. Do not add `PHOTO_MOCKS` to Netlify.
+
 ## ATproto Scripts
 
 Create/update the publication record:

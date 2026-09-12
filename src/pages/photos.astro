@@ -3,67 +3,132 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { getPhotos } from "../lib/photos";
 
 const photos = await getPhotos();
+const [latestPhoto, ...olderPhotos] = photos;
 ---
 
 <BaseLayout pageTitle="Photos" description="Photos from Kyle Hebert.">
-  {photos.length === 0 ? (
+  {!latestPhoto ? (
     <p>No photos yet.</p>
   ) : (
-    <div class="photo-feed">
-      {photos.map((photo) => (
-        <figure>
+    <>
+      <article class="latest-photo">
+        <a href={`/photos/${latestPhoto.id}/`} aria-label="Open the latest photo">
           <img
-            src={photo.data.imageUrl}
-            alt={photo.data.alt}
-            width={photo.data.width}
-            height={photo.data.height}
-            loading="lazy"
+            src={latestPhoto.data.imageUrl}
+            alt={latestPhoto.data.alt}
+            width={latestPhoto.data.width}
+            height={latestPhoto.data.height}
             decoding="async"
           />
-          {(photo.data.caption || photo.data.createdAt) && (
-            <figcaption>
-              {photo.data.caption && <span>{photo.data.caption}</span>}
-              <time datetime={photo.data.createdAt.toISOString()}>
-                {photo.data.createdAt.toLocaleDateString("en-US", { dateStyle: "long" })}
-              </time>
-            </figcaption>
-          )}
-        </figure>
-      ))}
-    </div>
+        </a>
+        <div class="latest-caption">
+          {latestPhoto.data.caption && <p>{latestPhoto.data.caption}</p>}
+          <time datetime={latestPhoto.data.createdAt.toISOString()}>
+            {latestPhoto.data.createdAt.toLocaleDateString("en-US", { dateStyle: "long" })}
+          </time>
+        </div>
+      </article>
+
+      {olderPhotos.length > 0 && (
+        <section class="archive" aria-labelledby="older-photos">
+          <h2 id="older-photos">Earlier photos</h2>
+          <div class="photo-grid">
+            {olderPhotos.map((photo) => (
+              <a href={`/photos/${photo.id}/`} aria-label={photo.data.caption || photo.data.alt}>
+                <img
+                  src={photo.data.imageUrl}
+                  alt={photo.data.alt}
+                  width={photo.data.width}
+                  height={photo.data.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+    </>
   )}
 </BaseLayout>
 
 <style>
-  .photo-feed {
+  .latest-photo {
+    width: 100%;
+    max-width: 44rem;
+    margin: 0 auto 3rem;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .latest-photo > a {
+    display: flex;
+    justify-content: center;
+  }
+
+  .latest-photo img {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+  }
+
+  .latest-caption {
+    max-width: 36rem;
+    margin: 0.9rem auto 0;
+    padding: 0;
+    text-align: center;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .latest-caption p {
+    margin: 0 0 0.35rem;
+  }
+
+  .archive {
+    margin: 2rem 0 clamp(3rem, 8vw, 6rem);
+  }
+
+  .photo-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-    align-items: start;
-    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.45rem;
   }
 
-  figure {
-    margin: 0;
-    padding: 0.65rem;
+  .photo-grid a {
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
     background: var(--surface-bg);
-    border: 2px solid var(--page-fg);
-    box-shadow: 0.35rem 0.35rem 0 var(--aquamarine);
+    border: 2px solid transparent;
   }
 
-  img {
+  .photo-grid a:hover,
+  .photo-grid a:focus-visible {
+    border-color: var(--page-fg);
+    outline: 0.2rem solid var(--aquamarine);
+  }
+
+  .photo-grid img {
     display: block;
     width: 100%;
-  }
-
-  figcaption {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding-top: 0.65rem;
+    height: 100%;
+    object-fit: cover;
   }
 
   time {
     font-family: var(--font-sans), sans-serif;
     font-size: 0.8rem;
+  }
+
+  @media screen and (min-width: 36rem) {
+    .photo-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
 </style>

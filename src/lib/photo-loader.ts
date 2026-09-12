@@ -16,10 +16,18 @@ type PhotoRecord = {
   };
 };
 
-type PhotoLoaderOptions = { repo?: string; service?: string };
+type PhotoLoaderOptions = { repo?: string; service?: string; mocks?: boolean };
+
+const mockPhotos = [
+  { id: "mock-flower-box", imageUrl: "/images/flower-box.webp", alt: "A window flower box overflowing with colorful blooms.", caption: "Flowers catching the afternoon light.", daysAgo: 2 },
+  { id: "mock-pink-peony", imageUrl: "/images/pink-peony.webp", alt: "A pink peony blossom surrounded by green leaves.", caption: "The peonies never last long enough.", daysAgo: 5 },
+  { id: "mock-sand-cherry", imageUrl: "/images/sand-cherry.webp", alt: "Delicate blossoms on a sand cherry shrub.", caption: "A sure sign that spring has arrived.", daysAgo: 9 },
+  { id: "mock-victoria-sponge", imageUrl: "/images/victoria-sponge.webp", alt: "A homemade Victoria sponge cake filled with cream and jam.", caption: "Weekend baking project.", daysAgo: 14 },
+  { id: "mock-new-door", imageUrl: "/images/new-door.webp", alt: "A newly installed front door on a house.", caption: "A small house project with a big impact.", daysAgo: 21 },
+];
 
 const schema = z.object({
-  imageUrl: z.string().url(),
+  imageUrl: z.string().min(1),
   alt: z.string(),
   caption: z.string().optional(),
   createdAt: z.coerce.date(),
@@ -35,17 +43,15 @@ export const photoLoader = (options: PhotoLoaderOptions = {}): Loader => ({
   schema,
   async load({ store, logger, parseData, generateDigest }) {
     store.clear();
-    if (!options.repo) {
-      logger.warn("ATPROTO_REPO is unset; the photo feed will be empty.");
-      return;
-    }
-
     const service = (options.service ?? "https://bsky.social").replace(/\/+$/, "");
+    const repo = options.repo;
     let cursor: string | undefined;
     let count = 0;
-    do {
+    if (!repo) logger.warn("ATPROTO_REPO is unset; loading only configured photo fixtures.");
+
+    if (repo) do {
       const url = new URL(`${service}/xrpc/com.atproto.repo.listRecords`);
-      url.searchParams.set("repo", options.repo);
+      url.searchParams.set("repo", repo);
       url.searchParams.set("collection", PHOTO_COLLECTION);
       url.searchParams.set("limit", "100");
       if (cursor) url.searchParams.set("cursor", cursor);
@@ -81,6 +87,22 @@ export const photoLoader = (options: PhotoLoaderOptions = {}): Loader => ({
       cursor = payload.cursor;
     } while (cursor);
 
-    logger.info(`Loaded ${count} photo${count === 1 ? "" : "s"} from the PDS.`);
+    if (options.mocks) {
+      for (const mock of mockPhotos) {
+        const createdAt = new Date(Date.now() - mock.daysAgo * 86_400_000);
+        const data = await parseData({ id: mock.id, data: {
+          imageUrl: mock.imageUrl,
+          alt: mock.alt,
+          caption: mock.caption,
+          createdAt,
+          atUri: `at://did:example:visual-test/${PHOTO_COLLECTION}/${mock.id}`,
+        }});
+        store.set({ id: mock.id, data, digest: generateDigest({ ...mock, createdAt }) });
+        count += 1;
+      }
+      logger.warn("PHOTO_MOCKS is enabled; added temporary local photo fixtures.");
+    }
+
+    logger.info(`Loaded ${count} photo${count === 1 ? "" : "s"}.`);
   },
 });

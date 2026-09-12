@@ -22,6 +22,7 @@ const photos = defineCollection({
   loader: photoLoader({
     repo: env.ATPROTO_REPO,
     service: env.ATPROTO_SERVICE,
+    mocks: env.PHOTO_MOCKS === "true",
   }),
 });
 

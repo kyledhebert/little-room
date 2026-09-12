@@ -1,0 +1,224 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getPhotos, type Photo } from "../../lib/photos";
+
+export async function getStaticPaths() {
+  const photos = await getPhotos();
+  return photos.map((photo, index) => ({
+    params: { id: photo.id },
+    props: {
+      photo,
+      newerPhoto: photos[index - 1],
+      olderPhoto: photos[index + 1],
+    },
+  }));
+}
+
+interface Props { photo: Photo; newerPhoto?: Photo; olderPhoto?: Photo }
+const { photo, newerPhoto, olderPhoto } = Astro.props;
+const title = `Photo from ${photo.data.createdAt.toLocaleDateString("en-US", { dateStyle: "long" })}`;
+const blueskyRkey = photo.data.blueskyUri?.split("/").pop();
+const blueskyDid = photo.data.blueskyUri?.split("/")[2];
+const blueskyUrl = blueskyDid && blueskyRkey
+  ? `https://bsky.app/profile/${blueskyDid}/post/${blueskyRkey}`
+  : undefined;
+---
+
+<BaseLayout
+  pageTitle={title}
+  description={photo.data.caption || photo.data.alt}
+  socialImage={photo.data.imageUrl}
+  socialImageAlt={photo.data.alt}
+  socialImageType="image/jpeg"
+  socialImageWidth={photo.data.width}
+  socialImageHeight={photo.data.height}
+>
+  <p class="back"><a href="/photos/">← All photos</a></p>
+  <figure>
+    <div class="photo-viewer">
+      <img
+        src={photo.data.imageUrl}
+        alt={photo.data.alt}
+        width={photo.data.width}
+        height={photo.data.height}
+        decoding="async"
+      />
+      {(newerPhoto || olderPhoto) && (
+        <nav class="photo-navigation" aria-label="Photo navigation">
+          {newerPhoto && (
+            <a class="previous" href={`/photos/${newerPhoto.id}/`} aria-label="View newer photo" title="Newer photo">
+              <span aria-hidden="true">‹</span>
+            </a>
+          )}
+          {olderPhoto && (
+            <a class="next" href={`/photos/${olderPhoto.id}/`} aria-label="View older photo" title="Older photo">
+              <span aria-hidden="true">›</span>
+            </a>
+          )}
+        </nav>
+      )}
+    </div>
+    <figcaption>
+      {photo.data.caption && <p>{photo.data.caption}</p>}
+      <div class="metadata">
+        <time datetime={photo.data.createdAt.toISOString()}>
+          {photo.data.createdAt.toLocaleDateString("en-US", { dateStyle: "long" })}
+        </time>
+        {blueskyUrl && <a href={blueskyUrl}>View on Bluesky</a>}
+      </div>
+    </figcaption>
+  </figure>
+</BaseLayout>
+
+<style>
+  :global(main > h1) {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+  }
+
+  .back {
+    font-family: var(--font-sans), sans-serif;
+  }
+
+  figure {
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .photo-viewer {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .photo-viewer > img {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: 62svh;
+    object-fit: contain;
+  }
+
+  figcaption {
+    max-width: 44rem;
+    margin: 0.8rem auto 0;
+    text-align: center;
+  }
+
+  figcaption p {
+    margin-bottom: 0.35rem;
+  }
+
+  .metadata {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    font-family: var(--font-sans), sans-serif;
+    font-size: 0.85rem;
+  }
+
+  .photo-navigation {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .photo-navigation a {
+    position: absolute;
+    top: 50%;
+    display: grid;
+    width: 3rem;
+    height: 3rem;
+    place-items: center;
+    transform: translateY(-50%);
+    border: 1px solid color-mix(in srgb, var(--page-fg) 30%, transparent);
+    border-radius: 50%;
+    color: var(--page-fg);
+    background: var(--surface-bg);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 14%);
+    font-family: Arial, sans-serif;
+    font-size: 2rem;
+    line-height: 1;
+    text-decoration: none;
+    pointer-events: auto;
+  }
+
+  .photo-navigation a:hover,
+  .photo-navigation a:focus-visible {
+    color: var(--link-hover-color);
+    background: var(--focus-ring);
+    outline: 0.15rem solid var(--page-fg);
+    outline-offset: 0.1rem;
+  }
+
+  .photo-navigation span {
+    transform: translateY(-0.08em);
+  }
+
+  .photo-navigation .previous {
+    left: -0.75rem;
+    transform: translate(-100%, -50%);
+  }
+
+  .photo-navigation .next {
+    right: -0.75rem;
+    transform: translate(100%, -50%);
+  }
+
+  @media screen and (min-width: 48rem) {
+    figure {
+      width: min(78rem, calc(100vw - 8rem));
+      margin-left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+
+  @media screen and (min-width: 80rem) {
+    figure {
+      width: min(90rem, calc(100vw - 9rem));
+    }
+  }
+
+  @media screen and (max-height: 56rem) and (min-width: 48rem) {
+    .photo-viewer > img {
+      max-height: 64svh;
+    }
+  }
+
+  @media screen and (max-height: 42rem) and (min-width: 48rem) {
+    .photo-viewer > img {
+      max-height: 58svh;
+    }
+  }
+
+  @media screen and (min-height: 60rem) {
+    .photo-viewer > img {
+      max-height: 72svh;
+    }
+  }
+
+  @media screen and (max-width: 50rem) {
+    .photo-navigation {
+      position: static;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 0.75rem;
+    }
+
+    .photo-navigation a {
+      position: static;
+      transform: none;
+    }
+
+    .photo-navigation .previous,
+    .photo-navigation .next {
+      transform: none;
+    }
+
+    .photo-viewer > img {
+      max-height: 70svh;
+    }
+  }
+</style>
