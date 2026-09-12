@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { adminConfigured, createAdminCookie, oauthClient, ownerDid } from "../../../lib/admin-auth";
+import { adminConfigured, createAdminCookie, describeError, oauthClient, ownerDid } from "../../../lib/admin-auth";
 
 export const prerender = false;
 
@@ -20,6 +20,7 @@ export const GET: APIRoute = async ({ request, cookies, redirect }) => {
     });
     return redirect("/admin/photos/", 303);
   } catch (error) {
-    return new Response(error instanceof Error ? error.message : "OAuth callback failed.", { status: 400 });
+    console.error("Photo admin OAuth callback failed", error);
+    return new Response(describeError(error), { status: 400 });
   }
 };

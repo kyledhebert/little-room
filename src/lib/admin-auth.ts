@@ -18,6 +18,23 @@ const localClientId = `http://localhost?redirect_uri=${encodeURIComponent(callba
 const memoryState = new Map<string, NodeSavedState>();
 const memorySessions = new Map<string, NodeSavedSession>();
 
+const resilientFetch: typeof fetch = async (input, init) => {
+  const method = (input instanceof Request ? input.method : init?.method ?? "GET").toUpperCase();
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await fetch(input, init);
+      if (method !== "GET" || response.status < 500 || attempt === 2) return response;
+      await response.body?.cancel();
+    } catch (error) {
+      lastError = error;
+      if (method !== "GET" || attempt === 2) throw error;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 150 * (attempt + 1)));
+  }
+  throw lastError;
+};
+
 const persistentStore = () => {
   if (import.meta.env.DEV) return undefined;
   return getStore({ name: "photo-admin-oauth", consistency: "strong" });
@@ -60,6 +77,7 @@ export const oauthClient = () => {
     },
     stateStore: jsonStore("state", memoryState),
     sessionStore: jsonStore("session", memorySessions),
+    fetch: resilientFetch,
   });
   return client;
 };
@@ -90,4 +108,15 @@ export const verifyAdminCookie = (value?: string) => {
 export const assertSameOrigin = (request: Request) => {
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) throw new Error("Invalid request origin.");
+};
+
+export const describeError = (error: unknown) => {
+  const messages: string[] = [];
+  let current: unknown = error;
+  for (let depth = 0; current && depth < 6; depth += 1) {
+    const message = current instanceof Error ? current.message : String(current);
+    if (message && !messages.includes(message)) messages.push(message);
+    current = current instanceof Error ? current.cause : undefined;
+  }
+  return messages.join(" — caused by: ") || "Unexpected error.";
 };

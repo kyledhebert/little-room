@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { assertSameOrigin, oauthClient, verifyAdminCookie } from "../../../lib/admin-auth";
+import { assertSameOrigin, describeError, oauthClient, verifyAdminCookie } from "../../../lib/admin-auth";
 import { publishAdminPhoto } from "../../../lib/admin-photo-publisher";
 
 export const prerender = false;
@@ -24,7 +24,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     });
     return redirect("/admin/photos/?published=1", 303);
   } catch (error) {
-    const rawMessage = error instanceof Error ? error.message : "Publishing failed.";
+    console.error("Photo publishing failed", error);
+    const rawMessage = describeError(error);
     if (/session was deleted|session.*expired|invalid_grant/i.test(rawMessage)) {
       cookies.delete("photo_admin", { path: "/admin/photos" });
     }

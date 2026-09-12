@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { assertSameOrigin, oauthClient } from "../../../lib/admin-auth";
+import { assertSameOrigin, describeError, oauthClient } from "../../../lib/admin-auth";
 
 export const prerender = false;
 
@@ -12,6 +12,7 @@ export const POST: APIRoute = async ({ request }) => {
     const url = await oauthClient().authorize(handle, { state: crypto.randomUUID() });
     return Response.redirect(url, 303);
   } catch (error) {
-    return new Response(error instanceof Error ? error.message : "Unable to start login.", { status: 400 });
+    console.error("Photo admin OAuth login failed", error);
+    return new Response(describeError(error), { status: 400 });
   }
 };
