@@ -216,6 +216,8 @@ Authentication uses AT Protocol OAuth. Only the DID configured in
 creating/updating photo records, uploading blobs, and creating Bluesky posts.
 It does not request delete access. OAuth state and session data are kept in
 Netlify Blobs; no PDS password is stored on Netlify.
+Local development uses an in-memory OAuth store; production always uses
+Netlify Blobs so login and publishing can run in separate function instances.
 
 Configure these server-side production variables:
 

@@ -24,7 +24,11 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     });
     return redirect("/admin/photos/?published=1", 303);
   } catch (error) {
-    const message = encodeURIComponent(error instanceof Error ? error.message : "Publishing failed.");
+    const rawMessage = error instanceof Error ? error.message : "Publishing failed.";
+    if (/session was deleted|session.*expired|invalid_grant/i.test(rawMessage)) {
+      cookies.delete("photo_admin", { path: "/admin/photos" });
+    }
+    const message = encodeURIComponent(rawMessage);
     return redirect(`/admin/photos/?error=${message}`, 303);
   }
 };

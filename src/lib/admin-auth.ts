@@ -19,7 +19,7 @@ const memoryState = new Map<string, NodeSavedState>();
 const memorySessions = new Map<string, NodeSavedSession>();
 
 const persistentStore = () => {
-  if (!process.env.NETLIFY) return undefined;
+  if (import.meta.env.DEV) return undefined;
   return getStore({ name: "photo-admin-oauth", consistency: "strong" });
 };
 
