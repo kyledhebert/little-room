@@ -24,7 +24,7 @@ const photos = authenticated ? await getPhotos() : [];
     <>
       {published && <p class="notice success">Photo published successfully.</p>}
       {error && <p class="notice error">{error}</p>}
-      <form method="post" action="/admin/photos/publish" enctype="multipart/form-data" class="panel">
+      <form id="publish-form" method="post" action="/admin/photos/publish" enctype="multipart/form-data" class="panel">
         <label for="photo">Photo</label>
         <input id="photo" name="photo" type="file" accept="image/*" required />
         <img id="preview" alt="Selected photo preview" hidden />
@@ -46,6 +46,7 @@ const photos = authenticated ? await getPhotos() : [];
         </fieldset>
 
         <button type="submit">Publish photo</button>
+        <p id="publish-status" role="status" hidden></p>
       </form>
       <form method="post" action="/admin/photos/logout" class="logout">
         <button type="submit">Sign out</button>
@@ -67,11 +68,54 @@ const photos = authenticated ? await getPhotos() : [];
       <script>
         const input = document.querySelector<HTMLInputElement>("#photo");
         const preview = document.querySelector<HTMLImageElement>("#preview");
+        const form = document.querySelector<HTMLFormElement>("#publish-form");
+        const status = document.querySelector<HTMLParagraphElement>("#publish-status");
         input?.addEventListener("change", () => {
           const file = input.files?.[0];
           if (!file || !preview) return;
           preview.src = URL.createObjectURL(file);
           preview.hidden = false;
+        });
+
+        const compressPhoto = async (file: File) => {
+          const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+          const scale = Math.min(1, 2000 / bitmap.width, 2000 / bitmap.height);
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.round(bitmap.width * scale);
+          canvas.height = Math.round(bitmap.height * scale);
+          canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+          bitmap.close();
+          const blob = await new Promise<Blob>((resolve, reject) =>
+            canvas.toBlob(
+              (result) => result ? resolve(result) : reject(new Error("Unable to prepare this image.")),
+              "image/jpeg",
+              0.85
+            )
+          );
+          if (blob.size > 3_500_000) throw new Error("The prepared image is still too large to upload.");
+          const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+          return new File([blob], name, { type: "image/jpeg" });
+        };
+
+        form?.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const file = input?.files?.[0];
+          if (!file || !status) return;
+          const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+          button?.setAttribute("disabled", "");
+          status.hidden = false;
+          status.textContent = "Preparing photo…";
+          try {
+            const body = new FormData(form);
+            body.set("photo", await compressPhoto(file));
+            status.textContent = "Publishing to the PDS and selected networks…";
+            const response = await fetch(form.action, { method: "POST", body });
+            if (!response.ok) throw new Error(await response.text() || `Publishing failed (${response.status}).`);
+            window.location.assign(response.url);
+          } catch (error) {
+            status.textContent = error instanceof Error ? error.message : "Publishing failed.";
+            button?.removeAttribute("disabled");
+          }
         });
       </script>
     </>

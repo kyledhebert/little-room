@@ -229,6 +229,11 @@ During `astro dev`, OAuth uses AT Protocol's loopback-client mode and defaults
 to `http://127.0.0.1:4321`. If you run the dev server on another port, set
 `LOCAL_PUBLIC_URL` to that exact origin.
 
+The admin resizes and converts selected images in the browser before uploading
+them. This keeps the multipart request below Netlify Functions' effective
+4.5-megabyte binary payload limit; the server performs a final optimization
+before uploading the PDS blob.
+
 To rebuild the static photo feed immediately after publishing, create a Netlify
 build hook and store its URL as `NETLIFY_BUILD_HOOK`. Without it, a photo still
 reaches the PDS and any selected social destinations, but appears on `/photos/`
