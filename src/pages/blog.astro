@@ -20,6 +20,18 @@ const recentPostsWithHtml = await Promise.all(
 ---
 
 <BaseLayout pageTitle={pageTitle} pageTitleLevel={1}>
+  <details class="folded-note">
+    <summary>
+      <span>
+        <span class="note-heading">Essays, short notes, and weekly retros</span>
+        <span class="note-label">A note about the title</span>
+      </span>
+    </summary>
+    <div class="note-story">
+  <p>This is a place where I'll post writing of my own. Mostly essays, short notes and my weekly retros.
+    It's named after <a href="https://genius.com/The-white-stripes-little-room-lyrics">the White Stripes song</a> of the same name. I heard it years ago, and I've used the name for various incarnations of my blog ever since.
+    To me it perfectly captures the essence of what I'm doing here: good work, in my little room, that'll maybe turn into something bigger.
+  </p>
   <blockquote>
     <em>
       Well, you're in your little room, and you're working on something good<br>
@@ -29,11 +41,8 @@ const recentPostsWithHtml = await Promise.all(
     </em>
     <p>- "Little Room" by the White Stripes</p>
   </blockquote>
-  <p>This is a place where I'll post writing of my own. Mostly essays,short notes and my weekly retros.
-    It's named after <a href="https://genius.com/The-white-stripes-little-room-lyrics">the White Stripes song</a> of the same name. I heard it years ago, and I've used the name for various incarnations of my blog ever since.
-    To me it perfectly captures the essence of what I'm doing here: good work, in my little room, that'll maybe turn into something bigger. 
-  </p>
-  <p>It's got an <a href="/rss.xml">RSS feed</a> if you're into that sort of thing.</p>
+    </div>
+  </details>
   <div class="content">
     {recentPostsWithHtml.map(({ post, Content }) => (
     <article>
@@ -69,13 +78,128 @@ const recentPostsWithHtml = await Promise.all(
   )}
   </div>
   <style>
+    .folded-note {
+      position: relative;
+      max-width: 660px;
+      margin: 1.5rem 0 2rem;
+      padding: 17px 25px 18px;
+      border-radius: 2px 0 2px 2px;
+      background: linear-gradient(225deg, transparent 26.87px, var(--surface-bg) 27px);
+      filter: drop-shadow(0 1px 0 rgb(72 40 74 / 16%)) drop-shadow(1px 5px 3px rgb(72 40 74 / 12%));
+    }
+
+    .folded-note::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(45deg, #e2d2b3 0%, #f2e6cc 48%, #d2bd99 50%, #eadcc1 100%);
+      clip-path: polygon(0 0, 0 100%, 100% 100%);
+      pointer-events: none;
+    }
+
+    .folded-note::after {
+      content: "";
+      position: absolute;
+      top: 38px;
+      right: 1px;
+      width: 36px;
+      height: 5px;
+      background: linear-gradient(to bottom, rgb(72 40 74 / 14%), transparent);
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+      pointer-events: none;
+    }
+
+    .folded-note summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      min-height: 54px;
+      padding-right: 33px;
+      list-style: none;
+      cursor: pointer;
+    }
+
+    .folded-note summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .folded-note summary::after {
+      content: "+";
+      font-size: 22px;
+      color: var(--link-color);
+    }
+
+    .folded-note[open] summary::after {
+      content: "−";
+    }
+
+    .folded-note summary:focus-visible {
+      outline: 2px solid var(--page-fg);
+      outline-offset: 6px;
+    }
+
+    .note-heading {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 17px;
+      line-height: 1.5;
+    }
+
+    .note-label {
+      display: block;
+      color: var(--link-color);
+      font-family: var(--font-sans), sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .folded-note summary:hover .note-label {
+      color: var(--link-hover-color);
+    }
+
+    .note-story {
+      padding-top: 12px;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .note-story blockquote {
+      margin: 24px 0 0;
+      padding-left: 18px;
+      border-left: 2px solid var(--link-color);
+    }
+
+    .note-story blockquote p {
+      font-size: 14px;
+    }
+
+    @media (max-width: 650px) {
+      .folded-note {
+        padding: 15px 19px 16px;
+      }
+
+      .folded-note summary {
+        padding-right: 26px;
+      }
+
+      .note-heading {
+        font-size: 15px;
+      }
+    }
+
     h2 {
       display: flex;
       align-items: center;
       gap: 0.6rem;
       flex-wrap: wrap;
     }
-    
+
     article {
       margin: 0 0 2rem 0;
       border-bottom: 2px var(--page-fg) dashed ;
