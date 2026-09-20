@@ -1,5 +1,6 @@
 import type { Loader } from "astro/loaders";
 import { z } from "astro/zod";
+import { fetchContentJson } from "./content-fetch";
 
 const PHOTO_COLLECTION = "net.kylehebert.photo";
 
@@ -55,9 +56,7 @@ export const photoLoader = (options: PhotoLoaderOptions = {}): Loader => ({
       url.searchParams.set("collection", PHOTO_COLLECTION);
       url.searchParams.set("limit", "100");
       if (cursor) url.searchParams.set("cursor", cursor);
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Unable to load photos: ${response.status} ${response.statusText}`);
-      const payload = await response.json() as { cursor?: string; records?: PhotoRecord[] };
+      const payload = await fetchContentJson<{ cursor?: string; records?: PhotoRecord[] }>(url);
 
       for (const record of payload.records ?? []) {
         const value = record.value;

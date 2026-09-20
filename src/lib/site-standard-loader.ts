@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { parseFrontmatter } from "@astrojs/markdown-remark";
 import type { Loader } from "astro/loaders";
 import { z } from "astro/zod";
+import { fetchContentJson } from "./content-fetch";
 
 const DOCUMENT_COLLECTION = "site.standard.document";
 const MARKDOWN_CONTENT_TYPE = "net.kylehebert.blog.markdown";
@@ -293,17 +294,10 @@ const listDocumentRecords = async ({
     url.searchParams.set("limit", "100");
     if (cursor) url.searchParams.set("cursor", cursor);
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(
-        `Unable to load ${DOCUMENT_COLLECTION}: ${response.status} ${response.statusText}`
-      );
-    }
-
-    const payload = (await response.json()) as {
+    const payload = await fetchContentJson<{
       cursor?: string;
       records?: SiteStandardDocumentRecord[];
-    };
+    }>(url);
     records.push(...(payload.records ?? []));
     cursor = payload.cursor;
   } while (cursor);
