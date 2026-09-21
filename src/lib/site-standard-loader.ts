@@ -40,6 +40,8 @@ type SiteStandardDocumentRecord = {
 type LoaderOptions = {
   source?: BlogSource;
   localBase?: string;
+  pathPrefix?: string;
+  allowEmpty?: boolean;
   repo?: string;
   service?: string;
   publicationUri?: string;
@@ -62,6 +64,19 @@ const slugFromPath = (documentPath?: string, uri?: string) => {
   }
 
   return uri?.split("/").pop() ?? "";
+};
+
+const normalizePathPrefix = (value?: string) => {
+  if (!value) return undefined;
+  const normalized = `/${value.split("/").filter(Boolean).join("/")}`;
+  return normalized === "/" ? undefined : normalized;
+};
+
+const pathMatchesPrefix = (documentPath: string | undefined, pathPrefix: string | undefined) => {
+  if (!pathPrefix) return true;
+  if (!documentPath) return false;
+  const normalizedPath = documentPath.startsWith("/") ? documentPath : `/${documentPath}`;
+  return normalizedPath === pathPrefix || normalizedPath.startsWith(`${pathPrefix}/`);
 };
 
 const plainTextToMarkdown = (text: string) =>
@@ -157,6 +172,7 @@ export const siteStandardDocumentLoader = (options: LoaderOptions = {}): Loader 
     async load({ store, logger, parseData, renderMarkdown, generateDigest, config }) {
       const selectedSource =
         source ?? (process.env.NETLIFY || process.env.CI ? undefined : "local");
+      const pathPrefix = normalizePathPrefix(options.pathPrefix);
 
       if (selectedSource !== "local" && selectedSource !== "pds") {
         throw new Error(
@@ -173,7 +189,7 @@ export const siteStandardDocumentLoader = (options: LoaderOptions = {}): Loader 
             : "BLOG_SOURCE is unset; defaulting to local Markdown source in development."
         );
         const rootPath = path.resolve(fileURLToPath(config.root), localBase);
-        const entries = await readdir(rootPath);
+        const entries = existsSync(rootPath) ? await readdir(rootPath) : [];
         const markdownFiles = entries.filter((entry) => entry.endsWith(".md")).sort();
 
         for (const file of markdownFiles) {
@@ -231,6 +247,7 @@ export const siteStandardDocumentLoader = (options: LoaderOptions = {}): Loader 
         const recordSite = value.site ? trimTrailingSlash(value.site) : "";
         const expectedSites = [publicationUri, siteUrl].filter(Boolean);
         if (!expectedSites.includes(recordSite)) continue;
+        if (!pathMatchesPrefix(value.path, pathPrefix)) continue;
 
         const id = slugFromPath(value.path, record.uri);
         const storedMarkdown =
@@ -270,7 +287,7 @@ export const siteStandardDocumentLoader = (options: LoaderOptions = {}): Loader 
         loadedCount += 1;
       }
 
-      if (loadedCount === 0) {
+      if (loadedCount === 0 && !options.allowEmpty) {
         throw new Error(`BLOG_SOURCE=pds loaded no valid ${DOCUMENT_COLLECTION} records.`);
       }
     },

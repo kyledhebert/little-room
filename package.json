@@ -11,9 +11,12 @@
     "atproto:post": "node --env-file=.env scripts/atproto-blog.mjs post",
     "atproto:publish": "node --env-file=.env scripts/atproto-blog.mjs publish",
     "atproto:publish:post": "node --env-file=.env scripts/atproto-blog.mjs publish",
+    "atproto:publish:five": "node --env-file=.env scripts/atproto-blog.mjs publish-five",
     "atproto:import": "node --env-file=.env scripts/atproto-blog.mjs import",
     "atproto:import:yes": "node --env-file=.env scripts/atproto-blog.mjs import --yes",
+    "atproto:import:fives": "node --env-file=.env scripts/atproto-blog.mjs import-fives",
     "atproto:validate": "node --env-file=.env scripts/atproto-blog.mjs validate",
+    "atproto:validate:five": "node --env-file=.env scripts/atproto-blog.mjs validate-five",
     "atproto:publish:photo": "node --env-file=.env scripts/atproto-photo.mjs publish"
   },
   "dependencies": {

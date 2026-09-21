@@ -11,6 +11,20 @@ const env = {
 const blog = defineCollection({
   loader: siteStandardDocumentLoader({
     source: env.BLOG_SOURCE as "local" | "pds" | undefined,
+    pathPrefix: "/posts",
+    repo: env.ATPROTO_REPO,
+    service: env.ATPROTO_SERVICE,
+    publicationUri: env.ATPROTO_PUBLICATION_URI,
+    siteUrl: env.SITE ?? "https://kylehebert.net",
+  }),
+});
+
+const fives = defineCollection({
+  loader: siteStandardDocumentLoader({
+    source: env.BLOG_SOURCE as "local" | "pds" | undefined,
+    localBase: "src/five",
+    pathPrefix: "/fives",
+    allowEmpty: true,
     repo: env.ATPROTO_REPO,
     service: env.ATPROTO_SERVICE,
     publicationUri: env.ATPROTO_PUBLICATION_URI,
@@ -26,4 +40,4 @@ const photos = defineCollection({
   }),
 });
 
-export const collections = { blog, photos };
+export const collections = { blog, fives, photos };

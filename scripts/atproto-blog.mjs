@@ -11,6 +11,20 @@ const PUBLICATION_COLLECTION = "site.standard.publication";
 const MARKDOWN_CONTENT_TYPE = "net.kylehebert.blog.markdown";
 const DEFAULT_SERVICE = "https://bsky.social";
 const DEFAULT_SITE_URL = "https://kylehebert.net";
+const CONTENT_KINDS = {
+  post: {
+    name: "post",
+    defaultDirectory: "src/blog",
+    pathPrefix: "/posts",
+    rkeyPrefix: "",
+  },
+  five: {
+    name: "five",
+    defaultDirectory: "src/five",
+    pathPrefix: "/fives",
+    rkeyPrefix: "five-",
+  },
+};
 
 const service = trimTrailingSlash(process.env.ATPROTO_SERVICE ?? DEFAULT_SERVICE);
 const siteUrl = trimTrailingSlash(process.env.SITE ?? process.env.ATPROTO_SITE_URL ?? DEFAULT_SITE_URL);
@@ -30,9 +44,12 @@ function usage() {
   npm run atproto:publication
   npm run atproto:post
   npm run atproto:publish -- <path-to-markdown>
+  npm run atproto:publish:five -- <path-to-markdown>
   npm run atproto:import -- [directory]
+  npm run atproto:import:fives -- [directory]
   npm run atproto:import:yes -- [directory]
   npm run atproto:validate -- <path-to-markdown>
+  npm run atproto:validate:five -- <path-to-markdown>
 
 Environment:
   ATPROTO_HANDLE or ATPROTO_IDENTIFIER  PDS account handle
@@ -128,6 +145,22 @@ function slugify(title) {
     .replace(/['"]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function contentKindConfig(kind = "post") {
+  const config = CONTENT_KINDS[kind];
+  if (!config) {
+    throw new Error(`Unknown content kind "${kind}". Expected one of: ${Object.keys(CONTENT_KINDS).join(", ")}.`);
+  }
+  return config;
+}
+
+function normalizePathPrefix(value) {
+  return `/${value.split("/").filter(Boolean).join("/")}`;
+}
+
+function contentPath(pathPrefix, slug) {
+  return `${normalizePathPrefix(pathPrefix)}/${slug}`;
 }
 
 function markdownToPlainText(markdown) {
@@ -369,7 +402,8 @@ async function createPublication() {
   console.log("Set ATPROTO_PUBLICATION_URI to this value in your local and deploy environments.");
 }
 
-async function recordFromMarkdownFile(filePath, token) {
+async function recordFromMarkdownFile(filePath, token, options = {}) {
+  const kind = contentKindConfig(options.kind);
   const absolutePath = path.resolve(filePath);
   const sourceDir = path.dirname(absolutePath);
   const source = await readFile(absolutePath, "utf8");
@@ -386,9 +420,12 @@ async function recordFromMarkdownFile(filePath, token) {
   }
 
   const slug = slugify(path.basename(filePath, path.extname(filePath)));
+  const rkey = `${kind.rkeyPrefix}${slug}`;
   const normalizedImage = await normalizePublicImage(data.image, sourceDir);
   return buildDocumentRecord({
     slug,
+    rkey,
+    pathPrefix: kind.pathPrefix,
     title,
     description: data.description,
     author: data.author,
@@ -400,7 +437,7 @@ async function recordFromMarkdownFile(filePath, token) {
   }, token);
 }
 
-async function buildDocumentRecord({ slug, title, description, author, published, publishedAt, markdown, image, coverImageSourcePath }, token) {
+async function buildDocumentRecord({ slug, rkey = slug, pathPrefix = "/posts", title, description, author, published, publishedAt, markdown, image, coverImageSourcePath }, token) {
   const coverImage = coverImageSourcePath && token
     ? await uploadCoverImageBlob(coverImageSourcePath, token)
     : undefined;
@@ -412,7 +449,7 @@ async function buildDocumentRecord({ slug, title, description, author, published
   const record = {
     $type: DOCUMENT_COLLECTION,
     site: publication,
-    path: `/posts/${slug}`,
+    path: contentPath(pathPrefix, slug),
     title,
     description,
     publishedAt,
@@ -429,9 +466,9 @@ async function buildDocumentRecord({ slug, title, description, author, published
   };
 
   Object.keys(record).forEach((key) => record[key] === undefined && delete record[key]);
-  validateDocumentRecord(slug, record);
+  validateDocumentRecord(rkey, record);
 
-  return { slug, record };
+  return { slug, rkey, record };
 }
 
 function validatePublicationRecord(record) {
@@ -462,18 +499,18 @@ function validateDocumentRecord(slug, record) {
   }
 }
 
-async function publish(filePath) {
+async function publish(filePath, options = {}) {
   if (!filePath) throw new Error("Pass a Markdown file path.");
   const session = await createSession();
-  const { slug, record } = await recordFromMarkdownFile(filePath, session.accessJwt);
-  const uri = await putDocumentRecord(session, slug, record);
+  const { rkey, record } = await recordFromMarkdownFile(filePath, session.accessJwt, options);
+  const uri = await putDocumentRecord(session, rkey, record);
   console.log(uri);
 }
 
-async function validateMarkdownFile(filePath) {
+async function validateMarkdownFile(filePath, options = {}) {
   if (!filePath) throw new Error("Pass a Markdown file path.");
-  const { slug, record } = await recordFromMarkdownFile(filePath);
-  console.log(JSON.stringify({ slug, record }, null, 2));
+  const { slug, rkey, record } = await recordFromMarkdownFile(filePath, undefined, options);
+  console.log(JSON.stringify({ slug, rkey, record }, null, 2));
 }
 
 async function markdownFilesFromPath(inputPath) {
@@ -503,17 +540,17 @@ async function markdownFilesFromPath(inputPath) {
   return [resolvedPath];
 }
 
-async function validatePath(inputPath) {
+async function validatePath(inputPath, options = {}) {
   const markdownFiles = await markdownFilesFromPath(inputPath);
 
   if (markdownFiles.length === 1) {
-    await validateMarkdownFile(markdownFiles[0]);
+    await validateMarkdownFile(markdownFiles[0], options);
     return;
   }
 
   for (const filePath of markdownFiles) {
-    const { slug } = await recordFromMarkdownFile(filePath);
-    console.log(`${path.relative(process.cwd(), filePath)}: ${slug}`);
+    const { slug, rkey } = await recordFromMarkdownFile(filePath, undefined, options);
+    console.log(`${path.relative(process.cwd(), filePath)}: ${slug} (${rkey})`);
   }
 
   console.log(`Validated ${markdownFiles.length} Markdown posts.`);
@@ -543,9 +580,11 @@ async function putDocumentRecord(session, slug, record) {
   return payload.uri;
 }
 
-async function importDirectory(directory = "src/blog", { confirmed = false } = {}) {
-  const markdownFiles = await markdownFilesFromPath(directory);
-  if (!confirmed && !(await confirmBulkImport(markdownFiles, directory))) {
+async function importDirectory(directory, { confirmed = false, kind = "post" } = {}) {
+  const config = contentKindConfig(kind);
+  const importDirectoryPath = directory ?? config.defaultDirectory;
+  const markdownFiles = await markdownFilesFromPath(importDirectoryPath);
+  if (!confirmed && !(await confirmBulkImport(markdownFiles, importDirectoryPath))) {
     console.log("Import cancelled.");
     return;
   }
@@ -553,8 +592,8 @@ async function importDirectory(directory = "src/blog", { confirmed = false } = {
   const session = await createSession();
 
   for (const file of markdownFiles) {
-    const { slug, record } = await recordFromMarkdownFile(file, session.accessJwt);
-    const uri = await putDocumentRecord(session, slug, record);
+    const { rkey, record } = await recordFromMarkdownFile(file, session.accessJwt, { kind });
+    const uri = await putDocumentRecord(session, rkey, record);
     console.log(`${path.basename(file)}: ${uri}`);
   }
 }
@@ -588,6 +627,8 @@ async function composePost() {
     const session = await createSession();
     const { slug: recordSlug, record } = await buildDocumentRecord({
       slug,
+      rkey: slug,
+      pathPrefix: CONTENT_KINDS.post.pathPrefix,
       title,
       description,
       author,
@@ -606,7 +647,14 @@ async function main() {
   const command = process.argv[2];
   const args = process.argv.slice(3);
   const confirmed = args.includes("--yes") || args.includes("-y");
-  const positionalArgs = args.filter((arg) => arg !== "--yes" && arg !== "-y");
+  const kindFlagIndex = args.indexOf("--kind");
+  const flagKind = kindFlagIndex >= 0 ? args[kindFlagIndex + 1] : undefined;
+  const positionalArgs = args.filter((arg, index) =>
+    arg !== "--yes" &&
+    arg !== "-y" &&
+    arg !== "--kind" &&
+    (kindFlagIndex < 0 || index !== kindFlagIndex + 1)
+  );
 
   if (!command || command === "help") {
     usage();
@@ -616,11 +664,17 @@ async function main() {
   if (command === "publication") {
     await createPublication();
   } else if (command === "publish") {
-    await publish(positionalArgs[0]);
+    await publish(positionalArgs[0], { kind: flagKind ?? "post" });
+  } else if (command === "publish-five") {
+    await publish(positionalArgs[0], { kind: "five" });
   } else if (command === "import") {
-    await importDirectory(positionalArgs[0], { confirmed });
+    await importDirectory(positionalArgs[0], { confirmed, kind: flagKind ?? "post" });
+  } else if (command === "import-fives") {
+    await importDirectory(positionalArgs[0], { confirmed, kind: "five" });
   } else if (command === "validate") {
-    await validatePath(positionalArgs[0]);
+    await validatePath(positionalArgs[0], { kind: flagKind ?? "post" });
+  } else if (command === "validate-five") {
+    await validatePath(positionalArgs[0], { kind: "five" });
   } else if (command === "post") {
     await composePost();
   } else {

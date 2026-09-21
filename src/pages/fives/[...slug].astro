@@ -1,0 +1,20 @@
+---
+import MarkdownPostLayout from "../../layouts/MarkdownPostLayout.astro";
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const fives = await getCollection("fives");
+  return fives.map((five) => ({
+    params: { slug: five.id },
+    props: { five },
+  }));
+}
+
+const { five } = Astro.props;
+const { Content } = await render(five);
+---
+
+<MarkdownPostLayout post={five}>
+  <Content />
+</MarkdownPostLayout>
+

@@ -2,14 +2,15 @@
 
 Personal Astro site for `kylehebert.net`.
 
-The main feature is the blog. The production content source is intended to be
-AT Protocol records using the Standard.site lexicons:
+The main feature is the blog, plus `/fives/` for top five lists. The production
+content source is intended to be AT Protocol records using the Standard.site
+lexicons:
 
 - `site.standard.publication` for the site/publication record
-- `site.standard.document` for individual posts
+- `site.standard.document` for individual posts and fives
 
-Markdown is still the authoring format, but once a post is published the PDS
-record is the production source of truth.
+Markdown is still the authoring format, but once a post or five is published
+the PDS record is the production source of truth.
 
 ## Local Development
 
@@ -48,24 +49,29 @@ npm run build
 `BLOG_SOURCE=pds` never falls back to local Markdown. If PDS config is missing or
 no valid records are loaded, the build should fail.
 
-## Blog Source Model
+## Content Source Model
 
-The Astro collection is still named `blog`, but it is loaded through
+The Astro collections are named `blog` and `fives`, and both are loaded through
 `siteStandardDocumentLoader()` in `src/content.config.ts`.
 
 Modes:
 
-- `BLOG_SOURCE=local`: load Markdown from `src/blog`
+- `BLOG_SOURCE=local`: load Markdown from `src/blog` and `src/five`
 - `BLOG_SOURCE=pds`: load `site.standard.document` records from the PDS
 - unset locally: default to local Markdown
 - unset on Netlify/CI: fail
 
+Blog posts are document records with paths under `/posts/`. Fives are document
+records with paths under `/fives/`, so they can share the same publication and
+AT collection without appearing in the wrong section.
+
 The pages should continue to use normal Astro content APIs:
 
 - `getCollection("blog")`
+- `getCollection("fives")`
 - `render(post)`
 
-Avoid adding a second blog data path.
+Avoid adding a second content data path for either section.
 
 ## Publishing Setup
 
@@ -132,6 +138,41 @@ git push
 
 The important order is: publish to the PDS before merging/deploying the code
 that expects that post and its generated images to exist.
+
+## Fives Workflow
+
+Write fives as Markdown in `src/five`. The frontmatter matches blog posts:
+
+```markdown
+---
+title: "Top Five Something"
+pubDate: 2026-09-21
+published: true
+description: "A short summary"
+author: "Kyle Hebert"
+---
+
+1. First thing
+2. Second thing
+3. Third thing
+4. Fourth thing
+5. Fifth thing
+```
+
+Publish one five to the PDS:
+
+```bash
+npm run atproto:publish:five -- src/five/top-five-something.md
+```
+
+Validate without writing to the PDS:
+
+```bash
+npm run atproto:validate:five -- src/five/top-five-something.md
+```
+
+Five records use paths like `/fives/top-five-something` and record keys prefixed
+with `five-` to avoid collisions with blog posts that have the same filename.
 
 ## One-Time Import
 
@@ -281,6 +322,12 @@ Publish a single Markdown post:
 npm run atproto:publish:post -- src/blog/my-post.md
 ```
 
+Publish a single five:
+
+```bash
+npm run atproto:publish:five -- src/five/my-five.md
+```
+
 Legacy alias for the same single-post publish:
 
 ```bash
@@ -293,6 +340,12 @@ Validate a Markdown post without writing to the PDS:
 npm run atproto:validate -- src/blog/my-post.md
 ```
 
+Validate a five without writing to the PDS:
+
+```bash
+npm run atproto:validate:five -- src/five/my-five.md
+```
+
 This validates frontmatter, rewrites image URLs in the generated record preview,
 and generates any needed `public/images` derivatives.
 
@@ -300,6 +353,12 @@ Import all Markdown posts with confirmation:
 
 ```bash
 npm run atproto:import -- src/blog
+```
+
+Import all fives with confirmation:
+
+```bash
+npm run atproto:import:fives -- src/five
 ```
 
 Import all Markdown posts without confirmation:

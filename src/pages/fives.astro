@@ -1,0 +1,112 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import BlogPost from "../components/BlogPost.astro";
+import { getSortedFives } from "../lib/fives";
+import { formatPubDate } from "../lib/dates";
+import { render } from "astro:content";
+
+const pageTitle = "Fives";
+const fives = await getSortedFives();
+const recentFives = fives.slice(0, 5);
+const olderFives = fives.slice(5);
+const recentFivesWithHtml = await Promise.all(
+  recentFives.map(async (five) => {
+    const { Content } = await render(five);
+    return { five, Content };
+  })
+);
+---
+
+<BaseLayout
+  pageTitle={pageTitle}
+  description="Top five lists from Kyle Hebert."
+>
+  <p class="intro">
+    Top five whatevers: records, movies, tiny joys, open questions, and anything
+    else that wants a ranked little home.
+  </p>
+
+  {
+    fives.length > 0 ? (
+      <div class="fives-content">
+        {recentFivesWithHtml.map(({ five, Content }) => (
+          <article class="five-preview">
+            <h2>
+              <a href={`/fives/${five.id}/`}>{five.data.title}</a>
+              <p class="pub-date">
+                {five.data.published === true ? formatPubDate(five.data.pubDate) : "Draft"}
+              </p>
+            </h2>
+            <div class="five-body">
+              <Content />
+            </div>
+          </article>
+        ))}
+
+        {olderFives.length > 0 && (
+          <section class="older-fives" aria-labelledby="older-fives-heading">
+            <h2 id="older-fives-heading">More Fives</h2>
+            <ul class="five-list">
+              {olderFives.map((five) => (
+                <BlogPost
+                  url={`/fives/${five.id}/`}
+                  title={five.data.title}
+                  pubDate={five.data.pubDate}
+                  published={five.data.published}
+                />
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
+    ) : (
+      <p>Nothing ranked yet.</p>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .intro {
+    max-width: 58ch;
+    font-size: 1.2rem;
+  }
+
+  .five-list {
+    padding: 0;
+  }
+
+  .five-preview {
+    margin: 0 0 2rem;
+    border-bottom: 2px var(--page-fg) dashed;
+  }
+
+  .five-preview h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .five-preview h2 a {
+    text-decoration: none;
+  }
+
+  .pub-date {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    top: -0.05em;
+    margin: 0;
+    padding: 0.15rem 0.65rem;
+    border-radius: 999px;
+    background-color: var(--aquamarine);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .five-body {
+    font-size: 1.2rem;
+  }
+</style>
