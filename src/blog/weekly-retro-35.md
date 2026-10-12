@@ -1,6 +1,6 @@
 ---
 title: "Weekly Retro #35"
-pubDate: 2026-10-96
+pubDate: 2026-10-06
 published: true
 description: "Better at being an uncle than singing"
 author: "Kyle Hebert"
@@ -8,7 +8,7 @@ author: "Kyle Hebert"
 
 I started the week with the first Crash Course Chorus rehearsal.  As usual, I was nervous before I got there, but the nerves went away almost immediately after showing up. That lack of information can be a killer. I realized pretty early that I was out of my depth as far as singing ability is concerned&mdash;it seems like many of the others are trained singers and many also have choir experience. I may not sing exactly on key, or know how to read sheet music, but I won't let that stop me.
 
-![Close-up of my upper arm with two cartoon animal Band-Aids, one above the other, after getting my flu and COVID vaccines.](../images/bernard-sun.png)
+![Close-up of my upper arm with two cartoon animal Band-Aids, one above the other, after getting my flu and COVID vaccines.](../images/double-vaxed.png)
 <p class="post-caption">Double vaxxed.</p>
 
 Unfortunately, I had to miss the second rehearsal because we traveled home to Louisiana at the end of the week. We got back last night. I balked a bit at writing "traveled home" there, because it doesn't feel like home anymore. There was a time when we would go back and I'd feel wistful or nostalgic about the landscape and the towns, but not anymore. I feel out of place there, and not just geographically. 
