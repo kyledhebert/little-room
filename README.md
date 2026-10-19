@@ -27,7 +27,8 @@ npm run dev
 ```
 
 When `BLOG_SOURCE` is unset locally, the blog loader defaults to local Markdown
-from `src/blog`. This keeps normal editing and previewing simple.
+from `src/blog` and its subdirectories. This keeps normal editing and previewing
+simple.
 
 To build from local Markdown explicitly:
 
@@ -72,6 +73,24 @@ The pages should continue to use normal Astro content APIs:
 - `render(post)`
 
 Avoid adding a second content data path for either section.
+
+### Local Blog Archive
+
+Keep posts for the current year directly in `src/blog`. After a calendar year is
+complete, move that year's published Markdown into `src/blog/archive/YYYY/`:
+
+```text
+src/blog/
+  archive/
+    2026/
+      weekly-retro-1.md
+  weekly-retro-53.md
+```
+
+Archive directories are organizational only. The Markdown filename still sets
+the post slug, URL, and AT Protocol record key, so moving a file does not change
+its published identity. Filenames must remain unique across all archive years.
+The PDS remains the production source of truth after publication.
 
 ## Publishing Setup
 
@@ -176,7 +195,7 @@ with `five-` to avoid collisions with blog posts that have the same filename.
 
 ## One-Time Import
 
-Import all existing Markdown posts:
+Import all existing Markdown posts (including yearly archive directories):
 
 ```bash
 npm run atproto:import -- src/blog

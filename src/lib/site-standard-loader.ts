@@ -50,6 +50,19 @@ type LoaderOptions = {
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 
+const findMarkdownFiles = async (directory: string): Promise<string[]> => {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = await Promise.all(
+    entries.map(async (entry) => {
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) return findMarkdownFiles(entryPath);
+      return entry.isFile() && entry.name.endsWith(".md") ? [entryPath] : [];
+    })
+  );
+
+  return files.flat().sort();
+};
+
 const slugify = (value: string) =>
   value
     .toLowerCase()
@@ -189,11 +202,10 @@ export const siteStandardDocumentLoader = (options: LoaderOptions = {}): Loader 
             : "BLOG_SOURCE is unset; defaulting to local Markdown source in development."
         );
         const rootPath = path.resolve(fileURLToPath(config.root), localBase);
-        const entries = existsSync(rootPath) ? await readdir(rootPath) : [];
-        const markdownFiles = entries.filter((entry) => entry.endsWith(".md")).sort();
+        const markdownFiles = existsSync(rootPath) ? await findMarkdownFiles(rootPath) : [];
+        const loadedIds = new Set<string>();
 
-        for (const file of markdownFiles) {
-          const absoluteFilePath = path.join(rootPath, file);
+        for (const absoluteFilePath of markdownFiles) {
           const filePath = path
             .relative(fileURLToPath(config.root), absoluteFilePath)
             .replace(/\\/g, "/");
@@ -201,7 +213,14 @@ export const siteStandardDocumentLoader = (options: LoaderOptions = {}): Loader 
           const parsed = parseFrontmatter(sourceText);
           const markdown = rewriteRenderableMarkdownImages(parsed.content.trim(), siteUrl);
           const frontmatter = parsed.frontmatter;
-          const id = slugify(path.basename(file, path.extname(file)));
+          const id = slugify(path.basename(absoluteFilePath, path.extname(absoluteFilePath)));
+          if (loadedIds.has(id)) {
+            throw new Error(
+              `Duplicate content slug "${id}" found while loading ${localBase}. ` +
+                "Archived posts must keep unique filenames."
+            );
+          }
+          loadedIds.add(id);
           const pubDate = frontmatter.pubDate ?? frontmatter.publishedAt;
 
           const data = await parseData({

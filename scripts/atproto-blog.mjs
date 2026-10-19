@@ -520,14 +520,22 @@ async function markdownFilesFromPath(inputPath) {
   const fileStat = await stat(resolvedPath);
 
   if (fileStat.isDirectory()) {
-    const entries = await readdir(resolvedPath);
-    const markdownFiles = entries
-      .filter((entry) => entry.endsWith(".md"))
-      .sort()
-      .map((entry) => path.join(resolvedPath, entry));
+    const markdownFiles = await findMarkdownFiles(resolvedPath);
 
     if (markdownFiles.length === 0) {
       throw new Error(`No Markdown files found in ${inputPath}.`);
+    }
+
+    const seenSlugs = new Set();
+    for (const file of markdownFiles) {
+      const slug = slugify(path.basename(file, path.extname(file)));
+      if (seenSlugs.has(slug)) {
+        throw new Error(
+          `Duplicate content slug "${slug}" found in ${inputPath}. ` +
+          "Archived posts must keep unique filenames."
+        );
+      }
+      seenSlugs.add(slug);
     }
 
     return markdownFiles;
@@ -538,6 +546,17 @@ async function markdownFilesFromPath(inputPath) {
   }
 
   return [resolvedPath];
+}
+
+async function findMarkdownFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = await Promise.all(entries.map(async (entry) => {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) return findMarkdownFiles(entryPath);
+    return entry.isFile() && entry.name.endsWith(".md") ? [entryPath] : [];
+  }));
+
+  return files.flat().sort();
 }
 
 async function validatePath(inputPath, options = {}) {
