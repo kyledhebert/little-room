@@ -1,5 +1,4 @@
- 
- ---
+---
 title: "Weekly Retro #37"
 pubDate: 2026-10-19
 published: true
